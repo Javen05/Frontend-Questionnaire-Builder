@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnosis Results</title>
+    <style>
+        .overlay {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background-color: rgba(255, 255, 255, 0.8);
+        z-index: 9999;
+        }
+
+        .spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: 4px solid #f3f3f3; /* Light grey */
+        border-top: 4px solid #3498db; /* Blue */
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+        }
+
+        .mt-3 {
+            margin-top: 1rem;
+        }
+
+        .navbar-bottom {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #f8f9fa;
+            box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+        }
+
+        .navbar-bottom .btn {
+            margin: 0.5rem 0;
+        }
+    </style>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="bootstrap.min.css">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="container">
+        <h1>Diagnosis Results</h1>
+        <h3>Major Depressive Disorder: <span id="score"></span></h3>
+        <h3>12-month prevalence Major Depressive Disorder: <span id="score12"></span></h3>
+        <div>
+            <br>
+        </div>
+        <h4>Name: <span id="userId"></span></h4>
+        <h5>Timestamp: <span id="userTimestamp"></span></h5>
+        <div id="results"></div>
+    </div>
+
+    <div><br></div> <div><br></div> <div><br></div> <div><br></div>
+    <div><br></div> <div><br></div> <div><br></div> <div><br></div>
+    <div><br></div> <div><br></div> <div><br></div> <div><br></div>
+
+    <!-- Bottom Navbar -->
+    <div class="navbar-bottom">
+        <div class="container">
+            <a id="downloadJson" class="btn btn-primary" href="#" download="results.json">Download JSON (Score included)</a>
+            <a id="downloadCsv" class="btn btn-primary" href="#" download="results.csv">Download CSV</a>
+            <button id="gotoDashboardButton" class="btn btn-primary">View Dashboard</button>
+            <button id="retryButton" class="btn btn-primary">Retry Questionnaire</button>
+        </div>
+    </div>
+    <!-- JavaScript -->
+    <script defer src="algorithm.js"></script>
+</body>
+</html>
