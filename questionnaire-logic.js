@@ -99,7 +99,7 @@ function generateQuestion(questionNumber, question, inputType, options, trigger,
                   <br>
                   <button type="button" class="btn btn-secondary clear-radio">Clear</button> ${
                     trigger
-                      ? `<button type="button" class="btn btn-primary proceed-btn" data-trigger="${trigger}">Proceed</button>`
+                      ? `<button type="button" class="btn btn-primary proceed-btn float-right" data-trigger="${trigger}">Proceed</button>`
                       : ""
                   }
               `;
