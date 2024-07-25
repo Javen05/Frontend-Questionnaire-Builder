@@ -49,15 +49,8 @@ function generateQuestion(questionNumber, question, inputType, options, trigger,
         options.forEach(function (option) {
           html += '<div class="form-check">';
           html +=
-            '<input class="form-check-input" type="checkbox" id="q' +
-            questionNumber +
-            "option" +
-            option.value +
-            '" value="' +
-            option.value +
-            '" data-trigger="' +
-            (option.trigger ? option.trigger : "") +
-            '">';
+            `<input class="form-check-input" type="checkbox" name="question${questionNumber}" id="q${questionNumber}option${option.value}" 
+            value="${option.value}" data-trigger="${option.trigger ? option.trigger : ''}">`
           html +=
             '<label class="form-check-label" for="q' +
             questionNumber +
@@ -199,7 +192,6 @@ function storeQuestionValues() {
           (checkbox) => checkbox.value
         );
       } else if (sortableList) {
-        console.log(sortableList)
         const listForOrder = [];
         sortableList.querySelectorAll('.sortable-item').forEach((item, index) => {
           const value = item.getAttribute('data-value');
@@ -588,9 +580,6 @@ questions.forEach((q) => {
 
 // 4. Unhide any existing questions
 if (hasUnsubmittedData) {
-  console.log("Stored questionPool:", storedQuestionPool);
-  console.log("Stored questionValues:", storedQuestionValues);
-
   questionPool = JSON.parse(storedQuestionPool);
   questionValues = JSON.parse(storedQuestionValues);
 
