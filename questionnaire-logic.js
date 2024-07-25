@@ -17,6 +17,7 @@ function generateQuestion(questionNumber, question, inputType, options, trigger,
                 }" data-question="${questionNumber}">
                     <label><strong>Question ${questionNumber}</strong>: ${
             inputType != "display" ? question : ""}
+            <br>
             ${hint ? `<small class="form-text text-muted">${hint}</small>` : ""}</label>
     `;
 
@@ -37,6 +38,10 @@ function generateQuestion(questionNumber, question, inputType, options, trigger,
                     </div>
                 `;
         });
+
+        trigger
+        ? html+=`<button type="button" class="btn btn-primary proceed-btn float-end" data-trigger="${trigger}">Proceed</button>`
+        : "";
       } else {
         console.error(
           "generateQuestion: options is not an array for radio input type",
@@ -61,6 +66,11 @@ function generateQuestion(questionNumber, question, inputType, options, trigger,
             "</label>";
           html += "</div>";
         });
+
+        trigger
+          ? html+=`<button type="button" class="btn btn-primary proceed-btn float-end" data-trigger="${trigger}">Proceed</button>`
+          : "";
+
       } else {
         console.error(
           "generateQuestion: options is not an array for checkbox input type",
@@ -75,24 +85,28 @@ function generateQuestion(questionNumber, question, inputType, options, trigger,
           trigger || ""
         }">
               `;
-  
-        if (Array.isArray(options) && options.length > 0) {
+        hasOptions = Array.isArray(options) && options.length > 0;
+        if (hasOptions) {
           options.forEach((option) => {
             html += `
                       <div class="form-check">
-                          <input class="form-check-input" type="radio" name="question${questionNumber}" id="q${questionNumber}option${option.value}" value="${option.value}" data-trigger="${option.trigger || ""}">
+                          <input class="form-check-input" type="radio" name="question${questionNumber}" id="q${questionNumber}option${option.value}" value="${option.value}" ${option.trigger ? `data-trigger="${option.trigger}"` : ''}">
                           <label class="form-check-label" for="q${questionNumber}option${option.value}">${option.label}</label>
                       </div>
                   `;
-          });
+          }); 
         } 
   
         html += `
                   </div>
-                  <br>
-                  <button type="button" class="btn btn-secondary clear-radio">Clear</button> ${
+                  ${
+                    hasOptions
+                    ? `<button type="button" class="btn btn-secondary clear-radio">Clear</button>`
+                    : ""
+                  }
+                  ${
                     trigger
-                      ? `<button type="button" class="btn btn-primary proceed-btn float-right" data-trigger="${trigger}">Proceed</button>`
+                      ? `<button type="button" class="btn btn-primary proceed-btn float-end" data-trigger="${trigger}">Proceed</button>`
                       : ""
                   }
               `;
@@ -102,7 +116,7 @@ function generateQuestion(questionNumber, question, inputType, options, trigger,
                 <div class="display-text">${question}</div>
                 ${
                   trigger
-                    ? `<button type="button" class="btn btn-primary proceed-btn float-right" data-trigger="${trigger}">Proceed</button>`
+                    ? `<button type="button" class="btn btn-primary proceed-btn float-end" data-trigger="${trigger}">Proceed</button>`
                     : ""
                 }
             `;
@@ -117,7 +131,7 @@ function generateQuestion(questionNumber, question, inputType, options, trigger,
           html += `
               <li class="sortable-item" draggable="true" data-value="${option.value}" data-trigger="${option.trigger || ""}">
                   ${option.label}
-                  <span class="badge badge-pill float-right">${index + 1}</span>
+                  <span class="badge bg-primary float-end">${index + 1}</span>
               </li>
           `;
         });
@@ -125,7 +139,7 @@ function generateQuestion(questionNumber, question, inputType, options, trigger,
               </ul>
               ${
                 trigger
-                  ? `<button type="button" class="btn btn-primary proceed-btn float-right" data-trigger="${trigger}">Proceed</button>`
+                  ? `<button type="button" class="btn btn-primary proceed-btn float-end" data-trigger="${trigger}">Proceed</button>`
                   : ""
               }
           `;
@@ -160,6 +174,9 @@ function generateQuestion(questionNumber, question, inputType, options, trigger,
                     }
                 </select>
             `;
+      trigger
+      ? html+=`<button type="button" class="btn btn-primary proceed-btn float-end" data-trigger="${trigger}">Proceed</button>`
+      : "";
       break;
   }
 
@@ -178,9 +195,7 @@ function storeQuestionValues() {
     if (!element.classList.contains("d-none")) {
       const select = element.querySelector("select");
       const responseInput = element.querySelector('input[type="text"]');
-      const checkboxes = element.querySelectorAll(
-        'input[type="checkbox"]:checked'
-      );
+      const checkboxes = element.querySelectorAll('input[type="checkbox"]:checked');
       const radioButton = element.querySelector('input[type="radio"]:checked');
       const sortableList = element.querySelector(".sortable-list");
       const questionNumber = element.getAttribute("data-question"); // Get the question number
@@ -197,8 +212,7 @@ function storeQuestionValues() {
           const value = item.getAttribute('data-value');
           listForOrder.push([`${index+1}: ${value}`])
         });
-        questionValues.push({ number: questionNumber, value: listForOrder });
-
+        selectedOption = listForOrder;
       } else {
         selectedOption = radioButton;
       }
@@ -262,6 +276,11 @@ function updateQuestionPool(questionNumber, questionPool) {
     : "radio";
 
   let selectedOptions = [];
+
+  const proceedButton = document.querySelector(
+    `[data-question="${questionNumber}"] button.proceed-btn`
+  );
+
   if (inputType === "radio") {
     selectedOptions = Array.from(
       document.querySelectorAll(`[name="question${questionNumber}"]:checked`)
@@ -273,7 +292,6 @@ function updateQuestionPool(questionNumber, questionPool) {
         `[data-question="${questionNumber}"] input:checked`
       )
     ).map((option) => option.getAttribute("data-trigger"));
-
   } else if (inputType === "response") {
     const responseInput = document.querySelector(
       `[data-question="${questionNumber}"] input[type="text"]`
@@ -295,24 +313,18 @@ function updateQuestionPool(questionNumber, questionPool) {
     }
 
   } else if (inputType === "display") {
-    selectedOptions = Array.from(
-      document.querySelectorAll(
-        `[data-question="${questionNumber}"] button.proceed-btn`
-      )
-    ).map((option) => option.getAttribute("data-trigger"));
-
+    if (proceedButton) {
+      selectedOptions = [proceedButton.getAttribute("data-trigger")];
+    }
   } else if (inputType === "sort") {
     const sortableItems = document.querySelectorAll(
       `[data-question="${questionNumber}"] .sortable-item`
     )
-    const proceedButton = document.querySelector(
-      `[data-question="${questionNumber}"] button.proceed-btn`
-    );
-    if (proceedButton) {
+    if (proceedButton && selectedOptions) {
       selectedOptions = [proceedButton.getAttribute("data-trigger")];
-    } if (sortableItems.length > 0 && sortableItems[0].dataset.trigger != "") {
+    } 
+    if (sortableItems.length > 0 && sortableItems[0].dataset.trigger != "") {
       selectedOptions = [sortableItems[0].dataset.trigger];
-      
     }
   } else { // select a.k.a dropdown
     selectedOptions = Array.from(
@@ -320,13 +332,19 @@ function updateQuestionPool(questionNumber, questionPool) {
         `[data-question="${questionNumber}"] option:checked`
       )
     ).map((option) => option.getAttribute("data-trigger"));
+
+    if (proceedButton && selectedOptions.every((option) => option === "")) {
+      selectedOptions = [proceedButton.getAttribute("data-trigger")];
+    }
   }
 
-  if (inputType != "sort") {
-    questionPool[questionNumber] = selectedOptions.filter((option) => option);
-    for (const option of selectedOptions) {
-      questionPool[option] = [];
-    }
+  if (selectedOptions.every((option) => option === "")) {
+    selectedOptions = [proceedButton ? proceedButton.getAttribute("data-trigger") : ""];
+  }
+
+  questionPool[questionNumber] = selectedOptions.filter((option) => option);
+  for (const option of selectedOptions) {
+    questionPool[option] = [];
   }
 
   // Check if any conditional question should be added to the question pool
@@ -525,6 +543,10 @@ function updateQuestionPool(questionNumber, questionPool) {
     }
   });
 
+  if (questionValues.some((q) => q.value != '')) {
+    document.getElementById("btn-submit").disabled = false;
+  } else { document.getElementById("btn-submit").disabled = true; }
+
   updateLocalStorage(questionPool, questionValues);
   lagQuestionPool = { ...questionPool };
 }
@@ -547,6 +569,36 @@ function handleQuestionChange(event, questionPool) {
   updateQuestionPool(questionNumber, questionPool);
 }
 
+function confirmationBeforeSubmission() {
+  const inputTypeLookup = questions.reduce((acc, question) => {
+    acc[question.number] = question.inputType;
+    return acc;
+  }, {});
+
+  // Filter out questions where inputType is "display" and count unanswered questions
+  const unansweredCount = questionValues
+    .filter(q => inputTypeLookup[q.number] !== 'display' && 
+            (typeof q.value === 'string' ? q.value.trim() == '' : !Array.isArray(q.value) || q.value.length === 0))
+    .length;
+
+  // Check if the user chose to skip the check
+  const skipCheck = document.getElementById('btn-check-2-outlined').checked;
+  const countSpan = document.getElementById('countOfUnansweredQuestions');
+  const countValueSpan = document.getElementById('countOfUnansweredQuestionsValue');
+  countValueSpan.innerText = unansweredCount;
+
+  if (skipCheck) {
+    return true; // Allow form submission
+  }
+  if (unansweredCount > 0) {
+    countSpan.classList.remove('d-none');
+    alert(`You have ${unansweredCount} unanswered question(s). Please answer all questions before submitting.`);
+    return false; // Prevent form submission
+  } else {
+    countSpan.classList.add('d-none');
+    return true; // Allow form submission
+  }
+}
 
 /**
  * Initialize variables
@@ -560,6 +612,10 @@ const storedQuestionValues = localStorage.getItem("questionValues");
 /**
  * Loading of page
  */
+// set title of questionnaire if variables can be found
+if (title) {document.getElementById("questionnaireTitle").innerText = title;}
+if (htmlTitle) {document.title = htmlTitle;}
+
 // 1. Initialize questionPool
 var questionPool = {};
 
@@ -704,116 +760,6 @@ document.addEventListener("click", function (event) {
   }
 });
 
-// Event listener for response input and radio box inputs
-document.addEventListener("change", function (event) {
-  handleQuestionChange(event, questionPool);
-  const target = event.target;
-  if (target && target.matches('.response-input input[type="text"]')) {
-    const questionElement = target.closest(".question");
-    if (questionElement === null) {
-      console.error("response-input change handler: questionElement is null", {
-        target,
-      });
-      return;
-    }
-    const questionNumber = questionElement.getAttribute("data-question");
-    // Clear radio box inputs
-    document
-      .querySelectorAll(`[name="question${questionNumber}"]:checked`)
-      .forEach((input) => {
-        input.checked = false;
-      });
-  } else if (target && target.matches('.response-input input[type="radio"]')) {
-    // Clear radio box for response-type
-    const questionElement = target.closest(".question");
-    if (questionElement === null) {
-      console.error("radio input change handler: questionElement is null", {
-        target,
-      });
-      return;
-    }
-    const questionNumber = questionElement.getAttribute("data-question");
-    // Clear text input
-    const responseInput = document.getElementById(`q${questionNumber}response`);
-    if (responseInput) {
-      responseInput.value = "";
-    } else {
-      console.error("radio input change handler: responseInput is null", {
-        questionNumber,
-      });
-    }
-  } else if (target && target.matches('.response-input input[type="checkbox"]')) {
-    const questionElement = target.closest(".question");
-    if (questionElement === null) {
-      console.error("checkbox input change handler: questionElement is null", {
-        target,
-      });
-      return;
-    }
-    const questionNumber = questionElement.getAttribute("data-question");
-    // Clear text input
-    const responseInput = document.getElementById(`q${questionNumber}response`);
-    if (responseInput) {
-      responseInput.value = "";
-    } else {
-      console.error("checkbox input change handler: responseInput is null", {
-        questionNumber,
-      });
-    }
-  }
-});
-document.getElementById("questionForm").addEventListener("submit", function (event) {
-  event.preventDefault(); // Prevent default form submission
-  var confirmationCheckbox = document.getElementById("confirmationCheckbox");
-  if (!confirmationCheckbox.checked) {
-    alert("Please confirm that your answers are correct before submitting.");
-    return; // Prevent form submission if the checkbox is not checked
-  }
-
-  questionValues = storeQuestionValues();
-
-  let openInNewTab = document.getElementById('newTabCheckbox').checked;
-  if (openInNewTab) {
-    let URL = "results.html?data="
-    window.open(URL + encodeURIComponent(JSON.stringify(questionValues)));
-    
-  } else {
-    var ID = prompt("Please enter ID:");
-    if (ID === null) {
-      return
-    }
-    if (ID == 'questionValues' || ID == 'questionPool') {
-      alert("This ID is not allowed. Please enter a different ID.");
-      return;
-    }
-    if (ID) {
-      // strip any -_ characters from ID
-      ID = ID.replace(/-_/g, "");
-    }
-
-    if (ID === undefined || ID === null || ID === "") {
-      // randomly assign ID
-      ID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    }
-    timestamp = new Date().toISOString();
-    // Store the form data, name, and ID in localStorage
-    var userData = {
-      ID: ID,
-      Timestamp: timestamp,
-      FormData: questionValues,
-      questionPool: questionPool,
-      questionValues: questionValues
-    };
-
-    // clear questionPool and questionValues from localStorage
-    localStorage.removeItem("questionPool");
-    localStorage.removeItem("questionValues");
-
-    localStorage.setItem(ID + "-_" + timestamp, JSON.stringify(userData));
-    window.location.href = "results.html";
-  }
-});
-
 // Sorting mechanism for 'sort' questionType
 document.addEventListener('DOMContentLoaded', () => {
   let draggedItem = null;
@@ -902,16 +848,117 @@ document.addEventListener('DOMContentLoaded', () => {
         const badge = item.querySelector('.badge');
         if (badge) {
           badge.textContent = index + 1;
-          badge.classList.add('badge-primary'); // Make badge blue (Bootstrap class)
         }
         const value = item.getAttribute('data-value');
         listForOrder.push([`${index+1}: ${value}`])
       });
       updateQuestionPool(questionNumber, questionPool);
-      questionValues.push({question: questionNumber, value: listForOrder})
     }
   });
 });
 
+// Event listener for response input and radio box inputs
+document.addEventListener("change", function (event) {
+  handleQuestionChange(event, questionPool);
+  const target = event.target;
+  if (target && target.matches('.response-input input[type="text"]')) {
+    const questionElement = target.closest(".question");
+    if (questionElement === null) {
+      console.error("response-input change handler: questionElement is null", {
+        target,
+      });
+      return;
+    }
+    const questionNumber = questionElement.getAttribute("data-question");
+    // Clear radio box inputs
+    document
+      .querySelectorAll(`[name="question${questionNumber}"]:checked`)
+      .forEach((input) => {
+        input.checked = false;
+      });
+  } else if (target && target.matches('.response-input input[type="radio"]')) {
+    // Clear radio box for response-type
+    const questionElement = target.closest(".question");
+    if (questionElement === null) {
+      console.error("radio input change handler: questionElement is null", {
+        target,
+      });
+      return;
+    }
+    const questionNumber = questionElement.getAttribute("data-question");
+    // Clear text input
+    const responseInput = document.getElementById(`q${questionNumber}response`);
+    if (responseInput) {
+      responseInput.value = "";
+    } else {
+      console.error("radio input change handler: responseInput is null", {
+        questionNumber,
+      });
+    }
+  } else if (target && target.matches('.response-input input[type="checkbox"]')) {
+    const questionElement = target.closest(".question");
+    if (questionElement === null) {
+      console.error("checkbox input change handler: questionElement is null", {
+        target,
+      });
+      return;
+    }
+    const questionNumber = questionElement.getAttribute("data-question");
+    // Clear text input
+    const responseInput = document.getElementById(`q${questionNumber}response`);
+    if (responseInput) {
+      responseInput.value = "";
+    } else {
+      console.error("checkbox input change handler: responseInput is null", {
+        questionNumber,
+      });
+    }
+  }
+});
+
+// Event listener for form submission
+document.getElementById("questionForm").addEventListener("submit", function (event) {
+  event.preventDefault(); // Prevent default form submission
+  allowSubmission = confirmationBeforeSubmission();
+  if (!allowSubmission) {
+    return;
+  }
+
+  questionValues = storeQuestionValues();
+
+  var ID = prompt("Please enter ID:");
+  if (ID === null) {
+    return
+  }
+  if (ID == 'questionValues' || ID == 'questionPool') {
+    alert("This ID is not allowed. Please enter a different ID.");
+    return;
+  }
+  if (ID) {
+    // strip any -_ characters from ID
+    ID = ID.replace(/-_/g, "");
+  }
+
+  if (ID === undefined || ID === null || ID === "") {
+    // randomly assign ID
+    ID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  }
+  timestamp = new Date().toISOString();
+  // Store the form data, name, and ID in localStorage
+  var userData = {
+    ID: ID,
+    Timestamp: timestamp,
+    FormData: questionValues,
+    questionPool: questionPool,
+    questionValues: questionValues
+  };
+
+  // clear questionPool and questionValues from localStorage
+  localStorage.removeItem("questionPool");
+  localStorage.removeItem("questionValues");
+
+  localStorage.setItem(ID + "-_" + timestamp, JSON.stringify(userData));
+  window.location.href = "results.html";
+});
 
 document.getElementById("loadingOverlay").style.display = "none"; // Hide the loading after page is loaded
