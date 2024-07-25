@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <link rel="stylesheet" href="bootstrap.min.css">
     <style>
         .overlay {
             position: fixed;
@@ -33,35 +34,26 @@
             100% { transform: rotate(360deg); }
         }
 
-        .mt-3 {
-            margin-top: 1rem;
-        }
-
-        .table th, .table td {
-            text-align: center;
-            vertical-align: middle;
-        }
-
         .navbar-bottom {
             position: fixed;
             bottom: 0;
+            left: 0;
             width: 100%;
-            background-color: #f8f9fa;
-            box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
-            padding: 1rem;
+            z-index: 9999;
         }
 
-        .navbar-bottom .btn {
-            margin: 0.5rem 0;
+        .content {
+            padding-bottom: 60px; /* Adjust this value based on the height of your navbar */
+        }
+        .table th, .table td {
+            min-width: 3.6rem;
+            text-align: center;
         }
     </style>
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="bootstrap.min.css">
 </head>
 
 <body>
-    <div class="container mt-5">
+    <div class="container mt-5 content">
         <h1>Dashboard of Responses</h1>
         <p>The data used for generating the dashboard are from past responses stored in Local Storage.</p>
         
@@ -86,21 +78,18 @@
                 </tbody>
             </table>
         </div>
+    </div>
 
-        <div><br></div> <div><br></div> <div><br></div> <div><br></div>
-        <div><br></div> <div><br></div> <div><br></div> <div><br></div>
-        <div><br></div> <div><br></div> <div><br></div> <div><br></div>
-
-        <!-- Bottom Navbar -->
-        <div class="navbar-bottom">
-            <div class="container">
-                <button id="downloadCsvButton" class="btn btn-primary mr-2">Download CSV</button>
-                <button id="goToQuestionnaireButton" class="btn btn-primary mr-2">Go to Questionnaire</button>
-                <button id="clearTableButton" class="btn btn-danger">Clear Table</button>
-            </div>
+    <!-- Bottom Navbar -->
+    <div class="navbar navbar-light bg-light navbar-bottom">
+        <div class="container d-flex justify-content-between py-2">
+            <button id="clearTableButton" class="btn btn-danger">Clear Table</button>
+            <button id="downloadCsvButton" class="btn btn-primary">Download CSV</button>
+            <button id="goToQuestionnaireButton" class="btn btn-secondary">Go to Questionnaire</button>
         </div>
     </div>
+
     <!-- JavaScript -->
-    <script defer src="dashboard.js"></script>
+    <script src="dashboard.js"></script>
 </body>
 </html>

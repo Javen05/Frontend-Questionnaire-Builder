@@ -5,36 +5,39 @@ document.addEventListener('DOMContentLoaded', function() {
     const tableHeaders = document.getElementById('tableHeaders');
     const downloadCsvButton = document.getElementById('downloadCsvButton');
     const goToQuestionnaireButton = document.getElementById('goToQuestionnaireButton');
-    const clearTableButton = document.getElementById('clearTableButton'); 
+    const clearTableButton = document.getElementById('clearTableButton');
 
     // Initialize variables object dynamically
     var variables = {};
 
     function fetchData() {
-        let data = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            const parts = key.split('-_');
-            if (parts.length === 2) {
+        const data = [];
+        const keys = Object.keys(localStorage);
+    
+        keys.forEach(key => {
+            const [ID, Timestamp] = key.split('-_');
+            
+            if (ID && Timestamp) {
                 const userDataString = localStorage.getItem(key);
-                if (userDataString) {
-                    const userData = JSON.parse(userDataString);
-                    userData.ID = key.split('-_')[0];
-                    userData.Timestamp = key.split('-_')[1];
-                    
-                    // Update variables with formData keys
-                    userData.FormData.forEach(entry => {
-                        if (!variables.hasOwnProperty(entry.number)) {
-                            variables[entry.number] = '';
-                        }
-                    });
-                    
-                    data.push(userData);
-                }
+                if (!userDataString) return;
+                
+                const userData = JSON.parse(userDataString);
+                userData.ID = ID;
+                userData.Timestamp = Timestamp;
+    
+                // Update variables with formData keys
+                userData.FormData.forEach(entry => {
+                    if (!variables[entry.number]) {
+                        variables[entry.number] = '';
+                    }
+                });
+    
+                data.push(userData);
             }
-        }
+        });
+    
         return data;
-    }
+    }    
 
     function getUniqueQuestions(data) {
         const questions = new Set();
@@ -48,11 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function generateHeaders() {
         const headers = ['ID', 'Date'];
-        for (const prop in variables) {
-            if (variables[prop]) {
-                headers.push(prop);
-            }
-        }
+        headers.push(...Object.keys(variables));
         headers.push('View Submission Form');
         headers.push('Delete Record');
 
@@ -74,10 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${date}</td>
             `;
             for (const prop in variables) {
-                valueOfVariable = getValue(item, prop);
-                if (valueOfVariable === '') {
-                    valueOfVariable = '.';
-                }
+                const valueOfVariable = getValue(item, prop) || '';
                 rowHtml += `<td>${valueOfVariable}</td>`;
             }
             rowHtml += `
@@ -96,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function getValue(item, questionNumber) {
         const entry = item.FormData.find(entry => entry.number === questionNumber);
-        return entry ? entry.value : '.';
+        return entry ? entry.value : '-';
     }
 
     function filterData(data, searchTerm) {
@@ -106,14 +102,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function downloadCSV(data, uniqueQuestions) {
+    function downloadCSV(data) {
         const csvRows = [];
     
         // Extract headers from the first row of the table
         const headers = [];
         let headerCells = document.querySelectorAll('#tableHeaders th');
         // DROP View and Delete Record columns
-        headerCells = Array.from(headerCells).slice(0, -1);
+        headerCells = Array.from(headerCells).slice(0, -2);
         headerCells.forEach(cell => {
             headers.push(cell.textContent);
         });
@@ -124,10 +120,12 @@ document.addEventListener('DOMContentLoaded', function() {
         rows.forEach(row => {
             const csvRow = [];
             let cells = row.querySelectorAll('td');
-            //stop at last 3rd cell
-            cells = Array.from(cells).slice(0, -1);
+            // Stop at last 2 cells (View Submission Form and Delete Record)
+            cells = Array.from(cells).slice(0, -2);
             cells.forEach(cell => {
-                csvRow.push(cell.textContent.replace(',', '_')); // Remove commas to avoid creating new columns
+                let cellContent = cell.textContent;
+                cellContent = cellContent.replace(/"/g, '""'); // Escape double quotes
+                csvRow.push(`"${cellContent}"`);
             });
             csvRows.push(csvRow.join(','));
         });
@@ -146,14 +144,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }    
 
     window.deleteRow = function(ID, Timestamp) {
-        confirmDeleteRow = confirm(`Are you sure you want to delete ${ID}'s record?`);
+        const confirmDeleteRow = confirm(`Are you sure you want to delete ${ID}'s record?`);
         if (confirmDeleteRow) {
-           localStorage.removeItem(`${ID}-_${Timestamp}`);
-           location.reload();
+            localStorage.removeItem(`${ID}-_${Timestamp}`);
+            location.reload();
         }
     };
 
-    // openForm = set questionPool and QuestionValues in localstorage as per the Record's and then open index.html
     window.openForm = function(ID, Timestamp) {
         const selectedRecordKey = `${ID}-_${Timestamp}`;
         const selectedRecord = JSON.parse(localStorage.getItem(selectedRecordKey));
@@ -163,6 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     const data = fetchData();
+    console.log(data);
     const uniqueQuestions = getUniqueQuestions(data);
     generateHeaders();
     displayData(data);
@@ -176,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function() {
     downloadCsvButton.addEventListener('click', function() {
         const searchTerm = searchInput.value;
         const filteredData = filterData(data, searchTerm);
-        downloadCSV(filteredData, uniqueQuestions);
+        downloadCSV(filteredData);
     });
 
     goToQuestionnaireButton.addEventListener('click', function() {
@@ -184,8 +182,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     clearTableButton.addEventListener('click', function() {
-        deleteConfirmation = prompt("Are you sure? Enter 'PERMANENTLY DELETE' to confirm deletion. Once deleted, the data CANNOT be recovered!");
-        if (deleteConfirmation == "PERMANENTLY DELETE") {
+        const deleteConfirmation = prompt("Are you sure? Enter 'PERMANENTLY DELETE' to confirm deletion. Once deleted, the data CANNOT be recovered!");
+        if (deleteConfirmation === "PERMANENTLY DELETE") {
             localStorage.clear();
             responseTableBody.innerHTML = '';
         }
