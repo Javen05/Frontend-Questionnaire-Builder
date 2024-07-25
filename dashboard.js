@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function generateHeaders() {
-        const headers = ['ID', 'Date', 'MDD', 'MDD12'];
+        const headers = ['ID', 'Date'];
         for (const prop in variables) {
             if (variables[prop]) {
                 headers.push(prop);
@@ -72,8 +72,6 @@ document.addEventListener('DOMContentLoaded', function() {
             let rowHtml = `
                 <td>${item.ID}</td>
                 <td>${date}</td>
-                <td>${item.score || '.'}</td>
-                <td>${item.score12 || '.'}</td>
             `;
             for (const prop in variables) {
                 valueOfVariable = getValue(item, prop);
