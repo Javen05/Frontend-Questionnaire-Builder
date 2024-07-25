@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Update variables with formData keys
                     userData.FormData.forEach(entry => {
                         if (!variables.hasOwnProperty(entry.number)) {
-                            variables[entry.number] = '.';
+                            variables[entry.number] = '';
                         }
                     });
                     
