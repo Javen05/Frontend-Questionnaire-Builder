@@ -958,7 +958,7 @@ document.getElementById("questionForm").addEventListener("submit", function (eve
   localStorage.removeItem("questionValues");
 
   localStorage.setItem(ID + "-_" + timestamp, JSON.stringify(userData));
-  window.location.href = "results.html";
+  window.location.href = "dashboard.html";
 });
 
 document.getElementById("loadingOverlay").style.display = "none"; // Hide the loading after page is loaded
