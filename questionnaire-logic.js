@@ -764,6 +764,8 @@ document.addEventListener("click", function (event) {
 document.addEventListener('DOMContentLoaded', () => {
   let draggedItem = null;
   let originalContainer = null;
+  let initialOffsetX = 0;
+  let initialOffsetY = 0;
 
   document.querySelectorAll('.sortable-list').forEach(sortableList => {
     // Function to handle drag start for both mouse and touch
@@ -772,19 +774,28 @@ document.addEventListener('DOMContentLoaded', () => {
         draggedItem = event.target;
         originalContainer = draggedItem.closest('.sortable-list');
         draggedItem.classList.add('dragging');
+
         if (event.type === 'touchstart') {
           const touch = event.touches[0];
+          const rect = draggedItem.getBoundingClientRect();
+          initialOffsetX = touch.clientX - rect.left;
+          initialOffsetY = touch.clientY - rect.top;
           draggedItem.style.position = 'absolute';
-          draggedItem.style.top = `${touch.pageY}px`;
-          draggedItem.style.left = `${touch.pageX}px`;
+          draggedItem.style.zIndex = '1000';
+          draggedItem.style.width = `${rect.width}px`; // Prevent the item from shrinking
+          updatePosition(touch.clientX, touch.clientY);
         }
       }
     };
 
     // Function to handle drag end for both mouse and touch
-    const handleDragEnd = (event) => {
+    const handleDragEnd = () => {
       if (draggedItem) {
         draggedItem.classList.remove('dragging');
+        draggedItem.style.position = '';
+        draggedItem.style.zIndex = '';
+        draggedItem.style.width = '';
+        draggedItem.style.transform = ''; // Reset transform to prevent visual issues
         if (!originalContainer.contains(draggedItem)) {
           originalContainer.appendChild(draggedItem);
         }
@@ -807,6 +818,20 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     };
 
+    // Update position for touch movements
+    const handleTouchMove = (event) => {
+      if (draggedItem && event.touches.length > 0) {
+        const touch = event.touches[0];
+        updatePosition(touch.clientX, touch.clientY);
+        handleDragOver(event);
+      }
+    };
+
+    // Update the position of the dragged item
+    const updatePosition = (x, y) => {
+      draggedItem.style.transform = `translate(${x - initialOffsetX}px, ${y - initialOffsetY}px)`;
+    };
+
     // Attach mouse and touch events
     sortableList.addEventListener('dragstart', handleDragStart);
     sortableList.addEventListener('dragend', handleDragEnd);
@@ -815,7 +840,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sortableList.addEventListener('touchstart', handleDragStart);
     sortableList.addEventListener('touchend', handleDragEnd);
-    sortableList.addEventListener('touchmove', handleDragOver);
+    sortableList.addEventListener('touchmove', handleTouchMove);
 
     function getDragAfterElement(container, y) {
       const draggableElements = [...container.querySelectorAll('.sortable-item:not(.dragging)')];
@@ -836,7 +861,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateIndices(list) {
       const questionNumber = list.getAttribute('data-question');
       const items = list.querySelectorAll('.sortable-item');
-      listForOrder = []
+      listForOrder = [];
       items.forEach((item, index) => {
         const badge = item.querySelector('.badge');
         if (badge) {
