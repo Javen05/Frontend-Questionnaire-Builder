@@ -38,10 +38,6 @@ function generateQuestion(questionNumber, question, inputType, options, trigger,
                     </div>
                 `;
         });
-
-        trigger
-        ? html+=`<button type="button" class="btn btn-primary proceed-btn float-end" data-trigger="${trigger}">Proceed</button>`
-        : "";
       } else {
         console.error(
           "generateQuestion: options is not an array for radio input type",
@@ -66,11 +62,6 @@ function generateQuestion(questionNumber, question, inputType, options, trigger,
             "</label>";
           html += "</div>";
         });
-
-        trigger
-          ? html+=`<button type="button" class="btn btn-primary proceed-btn float-end" data-trigger="${trigger}">Proceed</button>`
-          : "";
-
       } else {
         console.error(
           "generateQuestion: options is not an array for checkbox input type",
@@ -104,20 +95,13 @@ function generateQuestion(questionNumber, question, inputType, options, trigger,
                     ? `<button type="button" class="btn btn-secondary clear-radio">Clear</button>`
                     : ""
                   }
-                  ${
-                    trigger
-                      ? `<button type="button" class="btn btn-primary proceed-btn float-end" data-trigger="${trigger}">Proceed</button>`
-                      : ""
-                  }
               `;
         break;
     case "display":
       html += `
                 <div class="display-text">${question}</div>
                 ${
-                  trigger
-                    ? `<button type="button" class="btn btn-primary proceed-btn float-end" data-trigger="${trigger}">Proceed</button>`
-                    : ""
+                  trigger ? "" : "<br>"
                 }
             `;
       break;
@@ -137,11 +121,6 @@ function generateQuestion(questionNumber, question, inputType, options, trigger,
         });
         html += `
               </ul>
-              ${
-                trigger
-                  ? `<button type="button" class="btn btn-primary proceed-btn float-end" data-trigger="${trigger}">Proceed</button>`
-                  : ""
-              }
           `;
       } else {
         console.error(
@@ -153,7 +132,7 @@ function generateQuestion(questionNumber, question, inputType, options, trigger,
 
     default:
       html += `
-                <select class="form-control" data-question="${questionNumber}">
+                <select class="form-control mb-1" data-question="${questionNumber}">
                     ${defaultOption}
                     ${
                       Array.isArray(options)
@@ -174,13 +153,16 @@ function generateQuestion(questionNumber, question, inputType, options, trigger,
                     }
                 </select>
             `;
-      trigger
-      ? html+=`<button type="button" class="btn btn-primary proceed-btn float-end" data-trigger="${trigger}">Proceed</button>`
-      : "";
       break;
   }
 
-  html += "</div>";
+  html += `
+          ${
+          trigger
+            ? `<button type="button" class="btn btn-primary proceed-btn float-end" data-trigger="${trigger}">Proceed</button><br><br>`
+            : ""
+        }
+        </div>`;
   return html;
 }
 
@@ -725,8 +707,15 @@ if (hasUnsubmittedData) {
               sortableList.appendChild(item);
             }
           }
-
-          updateIndices(sortableList);
+          console.log(items)
+          items.forEach((item, index) => {
+            const badge = item.querySelector('.badge');
+            const newIndex = order.indexOf(item.dataset.value);
+            if (newIndex !== -1) {
+              // Update the badge text to the new index + 1 (for 1-based indexing)
+              badge.textContent = newIndex + 1;
+            }
+          });
         }
       } else {
         const selectElement = document.querySelector(`select[data-question="${questionNumber}"]`);
@@ -734,7 +723,7 @@ if (hasUnsubmittedData) {
           selectElement.value = value;
         }
       }
-    } 
+    }
   });
 }
 
