@@ -557,6 +557,21 @@ function updateLocalStorage(questionPool, questionValues) {
   localStorage.setItem("questionValues", JSON.stringify(questionValues));
 }
 
+// for sort question's badge that display the option's index
+function updateIndices(list) {
+  const questionNumber = list.getAttribute('data-question');
+  const items = list.querySelectorAll('.sortable-item');
+  listForOrder = []
+  items.forEach((item, index) => {
+    const badge = item.querySelector('.badge');
+    if (badge) {
+      badge.textContent = index + 1;
+    }
+    const value = item.getAttribute('data-value');
+    listForOrder.push([`${index+1}: ${value}`])
+  });
+  updateQuestionPool(questionNumber, questionPool);
+}
 
 function handleQuestionChange(event, questionPool) {
   const target = event.target;
@@ -710,6 +725,8 @@ if (hasUnsubmittedData) {
               sortableList.appendChild(item);
             }
           }
+
+          updateIndices(sortableList);
         }
       } else {
         const selectElement = document.querySelector(`select[data-question="${questionNumber}"]`);
@@ -876,22 +893,66 @@ document.addEventListener('DOMContentLoaded', () => {
         { offset: Number.NEGATIVE_INFINITY }
       ).element;
     }
-
-    function updateIndices(list) {
-      const questionNumber = list.getAttribute('data-question');
-      const items = list.querySelectorAll('.sortable-item');
-      listForOrder = []
-      items.forEach((item, index) => {
-        const badge = item.querySelector('.badge');
-        if (badge) {
-          badge.textContent = index + 1;
-        }
-        const value = item.getAttribute('data-value');
-        listForOrder.push([`${index + 1}: ${value}`]);
-      });
-      updateQuestionPool(questionNumber, questionPool);
-    }
   });
+});
+
+// Event listener for response input and radio box inputs
+document.addEventListener("change", function (event) {
+  handleQuestionChange(event, questionPool);
+  const target = event.target;
+  if (target && target.matches('.response-input input[type="text"]')) {
+    const questionElement = target.closest(".question");
+    if (questionElement === null) {
+      console.error("response-input change handler: questionElement is null", {
+        target,
+      });
+      return;
+    }
+    const questionNumber = questionElement.getAttribute("data-question");
+    // Clear radio box inputs
+    document
+      .querySelectorAll(`[name="question${questionNumber}"]:checked`)
+      .forEach((input) => {
+        input.checked = false;
+      });
+  } else if (target && target.matches('.response-input input[type="radio"]')) {
+    // Clear radio box for response-type
+    const questionElement = target.closest(".question");
+    if (questionElement === null) {
+      console.error("radio input change handler: questionElement is null", {
+        target,
+      });
+      return;
+    }
+    const questionNumber = questionElement.getAttribute("data-question");
+    // Clear text input
+    const responseInput = document.getElementById(`q${questionNumber}response`);
+    if (responseInput) {
+      responseInput.value = "";
+    } else {
+      console.error("radio input change handler: responseInput is null", {
+        questionNumber,
+      });
+    }
+  } else if (target && target.matches('.response-input input[type="checkbox"]')) {
+    const questionElement = target.closest(".question");
+    if (questionElement === null) {
+      console.error("checkbox input change handler: questionElement is null", {
+        target,
+      });
+      return;
+    }
+    const questionNumber = questionElement.getAttribute("data-question");
+    // Clear text input
+    const responseInput = document.getElementById(`q${questionNumber}response`);
+    if (responseInput) {
+      responseInput.value = "";
+    } else {
+      console.error("checkbox input change handler: responseInput is null", {
+        questionNumber,
+      });
+    }
+  }
 });
 
 // Event listener for form submission
