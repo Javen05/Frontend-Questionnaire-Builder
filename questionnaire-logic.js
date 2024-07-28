@@ -763,113 +763,135 @@ document.addEventListener("click", function (event) {
 // Sorting mechanism for 'sort' questionType
 document.addEventListener('DOMContentLoaded', () => {
   let draggedItem = null;
-  let initialOffsetX = 0;
-  let initialOffsetY = 0;
+  let originalContainer = null;
 
   document.querySelectorAll('.sortable-list').forEach(sortableList => {
-    const handleDragStart = (event) => {
+    // Mouse events
+    sortableList.addEventListener('dragstart', (event) => {
       if (event.target.classList.contains('sortable-item')) {
         draggedItem = event.target;
-        const rect = draggedItem.getBoundingClientRect();
-        if (event.type === 'touchstart') {
-          const touch = event.touches[0];
-          initialOffsetX = touch.clientX - rect.left;
-          initialOffsetY = touch.clientY - rect.top;
-          draggedItem.style.position = 'absolute';
-          draggedItem.style.zIndex = '1000';
-          updatePosition(touch.clientX, touch.clientY);
+        originalContainer = draggedItem.closest('.sortable-list'); // Track the original container
+        draggedItem.classList.add('dragging');
+      }
+    });
+
+    sortableList.addEventListener('dragend', (event) => {
+      if (draggedItem) {
+        draggedItem.classList.remove('dragging');
+        // Ensure item is only in the original container
+        if (!originalContainer.contains(draggedItem)) {
+          originalContainer.appendChild(draggedItem);
+        }
+        draggedItem = null;
+        originalContainer = null;
+      }
+      updateIndices(sortableList);
+    });
+
+    sortableList.addEventListener('dragover', (event) => {
+      event.preventDefault(); // Prevent default handling to allow dropping
+      if (draggedItem && event.target.closest('.sortable-list') === originalContainer) {
+        const afterElement = getDragAfterElement(sortableList, event.clientY);
+        if (afterElement == null) {
+          sortableList.appendChild(draggedItem);
+        } else {
+          sortableList.insertBefore(draggedItem, afterElement);
         }
       }
-    };
+    });
 
-    const handleDragEnd = () => {
+    sortableList.addEventListener('drop', (event) => {
+      event.preventDefault();
+      // Ensure the item is only placed within the original container
+      if (draggedItem && event.target.closest('.sortable-list') === originalContainer) {
+        const afterElement = getDragAfterElement(originalContainer, event.clientY);
+        if (afterElement == null) {
+          originalContainer.appendChild(draggedItem);
+        } else {
+          originalContainer.insertBefore(draggedItem, afterElement);
+        }
+      } else {
+        // If dropped outside the original container, revert it
+        if (originalContainer) {
+          originalContainer.appendChild(draggedItem);
+        }
+      }
+      // Clean up
       if (draggedItem) {
-        draggedItem.style.position = '';
-        draggedItem.style.zIndex = '';
-        draggedItem.style.top = '';
-        draggedItem.style.left = '';
-        draggedItem.style.transform = ''; // Reset transform if used
         draggedItem.classList.remove('dragging');
         draggedItem = null;
+        originalContainer = null;
       }
-    };
+    });
 
-    const handleTouchMove = (event) => {
-      if (draggedItem && event.touches.length > 0) {
-        event.preventDefault(); // Prevent scrolling while dragging
+    // Touch events
+    sortableList.addEventListener('touchstart', (event) => {
+      if (event.target.classList.contains('sortable-item')) {
+        draggedItem = event.target;
+        originalContainer = draggedItem.closest('.sortable-list');
+        draggedItem.classList.add('dragging');
+        event.preventDefault();
+      }
+    });
+
+    sortableList.addEventListener('touchend', (event) => {
+      if (draggedItem) {
+        draggedItem.classList.remove('dragging');
+        if (!originalContainer.contains(draggedItem)) {
+          originalContainer.appendChild(draggedItem);
+        }
+        draggedItem = null;
+        originalContainer = null;
+      }
+      updateIndices(sortableList);
+      event.preventDefault();
+    });
+
+    sortableList.addEventListener('touchmove', (event) => {
+      event.preventDefault(); // Prevent default handling to allow dropping
+      if (draggedItem && event.target.closest('.sortable-list') === originalContainer) {
         const touch = event.touches[0];
-        updatePosition(touch.clientX, touch.clientY);
+        const afterElement = getDragAfterElement(sortableList, touch.clientY);
+        if (afterElement == null) {
+          sortableList.appendChild(draggedItem);
+        } else {
+          sortableList.insertBefore(draggedItem, afterElement);
+        }
       }
-    };
+    });
 
-    const updatePosition = (x, y) => {
-      draggedItem.style.top = `${y - initialOffsetY}px`;
-      draggedItem.style.left = `${x - initialOffsetX}px`;
-    };
+    function getDragAfterElement(container, y) {
+      const draggableElements = [...container.querySelectorAll('.sortable-item:not(.dragging)')];
 
-    sortableList.addEventListener('touchstart', handleDragStart);
-    sortableList.addEventListener('touchend', handleDragEnd);
-    sortableList.addEventListener('touchmove', handleTouchMove);
+      return draggableElements.reduce(
+        (closest, child) => {
+          const box = child.getBoundingClientRect();
+          const offset = y - box.top - box.height / 2;
+          if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+          } else {
+            return closest;
+          }
+        },
+        { offset: Number.NEGATIVE_INFINITY }
+      ).element;
+    }
+
+    function updateIndices(list) {
+      const questionNumber = list.getAttribute('data-question');
+      const items = list.querySelectorAll('.sortable-item');
+      listForOrder = []
+      items.forEach((item, index) => {
+        const badge = item.querySelector('.badge');
+        if (badge) {
+          badge.textContent = index + 1;
+        }
+        const value = item.getAttribute('data-value');
+        listForOrder.push([`${index + 1}: ${value}`]);
+      });
+      updateQuestionPool(questionNumber, questionPool);
+    }
   });
-});
-
-// Event listener for response input and radio box inputs
-document.addEventListener("change", function (event) {
-  handleQuestionChange(event, questionPool);
-  const target = event.target;
-  if (target && target.matches('.response-input input[type="text"]')) {
-    const questionElement = target.closest(".question");
-    if (questionElement === null) {
-      console.error("response-input change handler: questionElement is null", {
-        target,
-      });
-      return;
-    }
-    const questionNumber = questionElement.getAttribute("data-question");
-    // Clear radio box inputs
-    document
-      .querySelectorAll(`[name="question${questionNumber}"]:checked`)
-      .forEach((input) => {
-        input.checked = false;
-      });
-  } else if (target && target.matches('.response-input input[type="radio"]')) {
-    // Clear radio box for response-type
-    const questionElement = target.closest(".question");
-    if (questionElement === null) {
-      console.error("radio input change handler: questionElement is null", {
-        target,
-      });
-      return;
-    }
-    const questionNumber = questionElement.getAttribute("data-question");
-    // Clear text input
-    const responseInput = document.getElementById(`q${questionNumber}response`);
-    if (responseInput) {
-      responseInput.value = "";
-    } else {
-      console.error("radio input change handler: responseInput is null", {
-        questionNumber,
-      });
-    }
-  } else if (target && target.matches('.response-input input[type="checkbox"]')) {
-    const questionElement = target.closest(".question");
-    if (questionElement === null) {
-      console.error("checkbox input change handler: questionElement is null", {
-        target,
-      });
-      return;
-    }
-    const questionNumber = questionElement.getAttribute("data-question");
-    // Clear text input
-    const responseInput = document.getElementById(`q${questionNumber}response`);
-    if (responseInput) {
-      responseInput.value = "";
-    } else {
-      console.error("checkbox input change handler: responseInput is null", {
-        questionNumber,
-      });
-    }
-  }
 });
 
 // Event listener for form submission
