@@ -1,6 +1,6 @@
 htmlTitle = "Questionnaire"
 title = "Title for questionnaire"
-compulsoryQuestions = ["QN0"];
+compulsoryQuestions = ["QN0", "RATING"];
 
 questions = [
   {
@@ -131,6 +131,19 @@ questions = [
     number: "Conditional-3",
     inputType: "display",
     question: "Select all checkbox for QN3",
+  },
+  {
+    number: "RATING",
+    inputType: "sort",
+    question:
+      "Rate this Questionnaire",
+    options: [
+      { label: "Excellent", value: 1 },
+      { label: "Good", value: 2 },
+      { label: "Neutral", value: 3 },
+      { label: "Poor", value: 4 },
+      { label: "Very Poor", value: 5 },
+    ]
   }
 ];
 
