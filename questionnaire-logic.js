@@ -766,66 +766,59 @@ document.addEventListener('DOMContentLoaded', () => {
   let originalContainer = null;
 
   document.querySelectorAll('.sortable-list').forEach(sortableList => {
-    sortableList.addEventListener('dragstart', (event) => {
+    // Function to handle drag start for both mouse and touch
+    const handleDragStart = (event) => {
       if (event.target.classList.contains('sortable-item')) {
         draggedItem = event.target;
-        originalContainer = draggedItem.closest('.sortable-list'); // Track the original container
+        originalContainer = draggedItem.closest('.sortable-list');
         draggedItem.classList.add('dragging');
+        if (event.type === 'touchstart') {
+          const touch = event.touches[0];
+          draggedItem.style.position = 'absolute';
+          draggedItem.style.top = `${touch.pageY}px`;
+          draggedItem.style.left = `${touch.pageX}px`;
+        }
       }
-    });
+    };
 
-    sortableList.addEventListener('dragend', (event) => {
+    // Function to handle drag end for both mouse and touch
+    const handleDragEnd = (event) => {
       if (draggedItem) {
         draggedItem.classList.remove('dragging');
-        // Ensure item is only in the original container
         if (!originalContainer.contains(draggedItem)) {
           originalContainer.appendChild(draggedItem);
         }
         draggedItem = null;
         originalContainer = null;
+        updateIndices(sortableList);
       }
-      updateIndices(sortableList);
-    });
+    };
 
-    sortableList.addEventListener('dragover', (event) => {
-      event.preventDefault(); // Prevent default handling to allow dropping
+    // Function to handle dragging over valid areas
+    const handleDragOver = (event) => {
+      event.preventDefault();
       if (draggedItem && event.target.closest('.sortable-list') === originalContainer) {
-        const afterElement = getDragAfterElement(sortableList, event.clientY);
+        const afterElement = getDragAfterElement(sortableList, event.clientY || event.touches[0].clientY);
         if (afterElement == null) {
           sortableList.appendChild(draggedItem);
         } else {
           sortableList.insertBefore(draggedItem, afterElement);
         }
       }
-    });
+    };
 
-    sortableList.addEventListener('drop', (event) => {
-      event.preventDefault();
-      // Ensure the item is only placed within the original container
-      if (draggedItem && event.target.closest('.sortable-list') === originalContainer) {
-        const afterElement = getDragAfterElement(originalContainer, event.clientY);
-        if (afterElement == null) {
-          originalContainer.appendChild(draggedItem);
-        } else {
-          originalContainer.insertBefore(draggedItem, afterElement);
-        }
-      } else {
-        // If dropped outside the original container, revert it
-        if (originalContainer) {
-          originalContainer.appendChild(draggedItem);
-        }
-      }
-      // Clean up
-      if (draggedItem) {
-        draggedItem.classList.remove('dragging');
-        draggedItem = null;
-        originalContainer = null;
-      }
-    });
+    // Attach mouse and touch events
+    sortableList.addEventListener('dragstart', handleDragStart);
+    sortableList.addEventListener('dragend', handleDragEnd);
+    sortableList.addEventListener('dragover', handleDragOver);
+    sortableList.addEventListener('drop', handleDragEnd);
+
+    sortableList.addEventListener('touchstart', handleDragStart);
+    sortableList.addEventListener('touchend', handleDragEnd);
+    sortableList.addEventListener('touchmove', handleDragOver);
 
     function getDragAfterElement(container, y) {
       const draggableElements = [...container.querySelectorAll('.sortable-item:not(.dragging)')];
-
       return draggableElements.reduce(
         (closest, child) => {
           const box = child.getBoundingClientRect();
@@ -850,7 +843,7 @@ document.addEventListener('DOMContentLoaded', () => {
           badge.textContent = index + 1;
         }
         const value = item.getAttribute('data-value');
-        listForOrder.push([`${index+1}: ${value}`])
+        listForOrder.push([`${index + 1}: ${value}`]);
       });
       updateQuestionPool(questionNumber, questionPool);
     }
