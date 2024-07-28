@@ -763,115 +763,53 @@ document.addEventListener("click", function (event) {
 // Sorting mechanism for 'sort' questionType
 document.addEventListener('DOMContentLoaded', () => {
   let draggedItem = null;
-  let originalContainer = null;
   let initialOffsetX = 0;
   let initialOffsetY = 0;
 
   document.querySelectorAll('.sortable-list').forEach(sortableList => {
-    // Function to handle drag start for both mouse and touch
     const handleDragStart = (event) => {
       if (event.target.classList.contains('sortable-item')) {
         draggedItem = event.target;
-        originalContainer = draggedItem.closest('.sortable-list');
-        draggedItem.classList.add('dragging');
-
+        const rect = draggedItem.getBoundingClientRect();
         if (event.type === 'touchstart') {
           const touch = event.touches[0];
-          const rect = draggedItem.getBoundingClientRect();
           initialOffsetX = touch.clientX - rect.left;
           initialOffsetY = touch.clientY - rect.top;
           draggedItem.style.position = 'absolute';
           draggedItem.style.zIndex = '1000';
-          draggedItem.style.width = `${rect.width}px`; // Prevent the item from shrinking
           updatePosition(touch.clientX, touch.clientY);
         }
       }
     };
 
-    // Function to handle drag end for both mouse and touch
     const handleDragEnd = () => {
       if (draggedItem) {
-        draggedItem.classList.remove('dragging');
         draggedItem.style.position = '';
         draggedItem.style.zIndex = '';
-        draggedItem.style.width = '';
-        draggedItem.style.transform = ''; // Reset transform to prevent visual issues
-        if (!originalContainer.contains(draggedItem)) {
-          originalContainer.appendChild(draggedItem);
-        }
+        draggedItem.style.top = '';
+        draggedItem.style.left = '';
+        draggedItem.style.transform = ''; // Reset transform if used
+        draggedItem.classList.remove('dragging');
         draggedItem = null;
-        originalContainer = null;
-        updateIndices(sortableList);
       }
     };
 
-    // Function to handle dragging over valid areas
-    const handleDragOver = (event) => {
-      event.preventDefault();
-      if (draggedItem && event.target.closest('.sortable-list') === originalContainer) {
-        const afterElement = getDragAfterElement(sortableList, event.clientY || event.touches[0].clientY);
-        if (afterElement == null) {
-          sortableList.appendChild(draggedItem);
-        } else {
-          sortableList.insertBefore(draggedItem, afterElement);
-        }
-      }
-    };
-
-    // Update position for touch movements
     const handleTouchMove = (event) => {
       if (draggedItem && event.touches.length > 0) {
+        event.preventDefault(); // Prevent scrolling while dragging
         const touch = event.touches[0];
         updatePosition(touch.clientX, touch.clientY);
-        handleDragOver(event);
       }
     };
 
-    // Update the position of the dragged item
     const updatePosition = (x, y) => {
-      draggedItem.style.transform = `translate(${x - initialOffsetX}px, ${y - initialOffsetY}px)`;
+      draggedItem.style.top = `${y - initialOffsetY}px`;
+      draggedItem.style.left = `${x - initialOffsetX}px`;
     };
-
-    // Attach mouse and touch events
-    sortableList.addEventListener('dragstart', handleDragStart);
-    sortableList.addEventListener('dragend', handleDragEnd);
-    sortableList.addEventListener('dragover', handleDragOver);
-    sortableList.addEventListener('drop', handleDragEnd);
 
     sortableList.addEventListener('touchstart', handleDragStart);
     sortableList.addEventListener('touchend', handleDragEnd);
     sortableList.addEventListener('touchmove', handleTouchMove);
-
-    function getDragAfterElement(container, y) {
-      const draggableElements = [...container.querySelectorAll('.sortable-item:not(.dragging)')];
-      return draggableElements.reduce(
-        (closest, child) => {
-          const box = child.getBoundingClientRect();
-          const offset = y - box.top - box.height / 2;
-          if (offset < 0 && offset > closest.offset) {
-            return { offset: offset, element: child };
-          } else {
-            return closest;
-          }
-        },
-        { offset: Number.NEGATIVE_INFINITY }
-      ).element;
-    }
-
-    function updateIndices(list) {
-      const questionNumber = list.getAttribute('data-question');
-      const items = list.querySelectorAll('.sortable-item');
-      listForOrder = [];
-      items.forEach((item, index) => {
-        const badge = item.querySelector('.badge');
-        if (badge) {
-          badge.textContent = index + 1;
-        }
-        const value = item.getAttribute('data-value');
-        listForOrder.push([`${index + 1}: ${value}`]);
-      });
-      updateQuestionPool(questionNumber, questionPool);
-    }
   });
 });
 
