@@ -49,6 +49,48 @@ questions = [
       { label: "Option 4", value: 4 },
       { label: "Option 5", value: 5 },
     ],
+    trigger: "QN3a"
+  },
+  {
+    number: "QN3a",
+    inputType: "sort",
+    question:
+      "Rank these ratings in ordinal order",
+    options: [
+      { label: "Excellent", value: 1 },
+      { label: "Good", value: 2 },
+      { label: "Neutral", value: 3 },
+      { label: "Poor", value: 4 },
+      { label: "Very Poor", value: 5 },
+    ],
+    trigger: "QN3b"
+  },
+  {
+    number: "QN3b",
+    inputType: "sort",
+    question:
+      "Rank these numbers in order",
+    options: [
+      { label: "3", value: 3 },
+      { label: "2", value: 2 },
+      { label: "4", value: 4 },
+      { label: "5", value: 5 },
+      { label: "1", value: 1 },
+      { label: "6", value: 6 }
+    ],
+    trigger: "QN3c"
+  },
+  {
+    number: "QN3c",
+    inputType: "sort",
+    question:
+      "Rank these numbers in order",
+    options: [
+      { label: "3", value: 3 },
+      { label: "2", value: 2 },
+      { label: "1", value: 1 },
+      
+    ],
     trigger: "QN4"
   },
   {
@@ -134,7 +176,7 @@ questions = [
   },
   {
     number: "RATING",
-    inputType: "sort",
+    inputType: "dropdown",
     question:
       "Rate this Questionnaire",
     options: [
