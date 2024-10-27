@@ -1,4 +1,8 @@
 # Frontend-Questionnaire-Builder
+![image](https://github.com/user-attachments/assets/3d7d59fc-aa35-4048-b657-38a0fe5514a4)
+
+![image](https://github.com/user-attachments/assets/7e547853-432d-450f-8d96-dd2cf7036188)
+
 
 ## Background
 During my internship, I built a questionnaire where your unique response for each question leads you to a different follow-up question. Decided to share this questionnaire wrapper for individuals who need a questionnaire beyond the capabilities of basic questionnaire forms.
@@ -18,7 +22,7 @@ During my internship, I built a questionnaire where your unique response for eac
 
 
 ### 3. Dashboard that shows historical form submissions
-  - Can download to JSON or CSV
+  - Can download to CSV
   - Can view submitted responses in the form itself
 
   
