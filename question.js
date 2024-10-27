@@ -124,31 +124,37 @@ questions = [
     number: "S1",
     inputType: "display",
     question: "Thank you for your feedback on Customer Service!",
+    trigger: "QN2"
   },
   {
     number: "S2",
     inputType: "display",
     question: "You valued Quality of Service in your ranking.",
+    trigger: "QN3"
   },
   {
     number: "S3",
     inputType: "display",
     question: "You are interested in more payment options.",
+    trigger: "QN3a"
   },
   {
     number: "S4",
     inputType: "display",
     question: "You would like to see an expanded product range.",
+    trigger: "QN3a"
   },
   {
     number: "S5",
     inputType: "display",
     question: "Thank you for recommending our service!",
+    trigger: "QN5"
   },
   {
     number: "S6",
     inputType: "display",
     question: "Thank you for your rating of Excellent!",
+    trigger: "QN6"
   },
   {
     number: "Conditional-1",
