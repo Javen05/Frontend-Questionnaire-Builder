@@ -24,6 +24,12 @@ questions = [
     trigger: "QN2"
   },
   {
+    number: "S1",
+    inputType: "display",
+    question: "Thank you for your feedback on Customer Service!",
+    trigger: "QN2"
+  },
+  {
     number: "QN2",
     inputType: "sort",
     question: "Please rank the following attributes in order of importance:",
@@ -33,6 +39,12 @@ questions = [
       { label: "Quality of Service", value: 3, trigger: "S2" },
       { label: "Speed of Service", value: 4 },
     ],
+    trigger: "QN3"
+  },
+  {
+    number: "S2",
+    inputType: "display",
+    question: "You valued Quality of Service in your ranking.",
     trigger: "QN3"
   },
   {
@@ -46,6 +58,18 @@ questions = [
       { label: "Loyalty Program", value: 4 },
       { label: "Customer Referral Discounts", value: 5 },
     ],
+    trigger: "QN3a"
+  },
+  {
+    number: "S3",
+    inputType: "display",
+    question: "You are interested in more payment options.",
+    trigger: "QN3a"
+  },
+  {
+    number: "S4",
+    inputType: "display",
+    question: "You would like to see an expanded product range.",
     trigger: "QN3a"
   },
   {
@@ -99,6 +123,12 @@ questions = [
     trigger: "QN5"
   },
   {
+    number: "S5",
+    inputType: "display",
+    question: "Thank you for recommending our service!",
+    trigger: "QN5"
+  },
+  {
     number: "QN5",
     inputType: "dropdown",
     question: "How would you rate our service?",
@@ -111,6 +141,12 @@ questions = [
     trigger: "QN6"
   },
   {
+    number: "S6",
+    inputType: "display",
+    question: "Thank you for your rating of Excellent!",
+    trigger: "QN6"
+  },
+  {
     number: "QN6",
     inputType: "radio",
     question: "Would you visit us again?",
@@ -119,42 +155,6 @@ questions = [
       { label: "No", value: 2 },
       { label: "Maybe", value: 3 },
     ],
-  },
-  {
-    number: "S1",
-    inputType: "display",
-    question: "Thank you for your feedback on Customer Service!",
-    trigger: "QN2"
-  },
-  {
-    number: "S2",
-    inputType: "display",
-    question: "You valued Quality of Service in your ranking.",
-    trigger: "QN3"
-  },
-  {
-    number: "S3",
-    inputType: "display",
-    question: "You are interested in more payment options.",
-    trigger: "QN3a"
-  },
-  {
-    number: "S4",
-    inputType: "display",
-    question: "You would like to see an expanded product range.",
-    trigger: "QN3a"
-  },
-  {
-    number: "S5",
-    inputType: "display",
-    question: "Thank you for recommending our service!",
-    trigger: "QN5"
-  },
-  {
-    number: "S6",
-    inputType: "display",
-    question: "Thank you for your rating of Excellent!",
-    trigger: "QN6"
   },
   {
     number: "Conditional-1",
