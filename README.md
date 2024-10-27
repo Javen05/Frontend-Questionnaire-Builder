@@ -3,8 +3,9 @@
 ## Background
 During my internship, I built a questionnaire where your unique response for each question leads you to a different follow-up question. Decided to share this questionnaire wrapper for individuals who need a questionnaire beyond the capabilities of basic questionnaire forms.
 
-## Features:
+## Features
 ### 1. Multiple question types for all question needs:
+  - Display (For stating instructions)
   - MCQ: Radio
   - MCQ: Dropdown
   - Short answer
@@ -26,3 +27,8 @@ During my internship, I built a questionnaire where your unique response for eac
 
   
 ### 5. Web and Mobile Responsive
+
+## Usage
+0. Download all files and store in a folder
+1. Replace question.js with your own questions
+2. Open index.html
