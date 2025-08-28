@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             rowHtml += `
                 <td>
-                    <button class="btn btn-sm btn-info" onclick="openForm('${item.ID}', '${item.Timestamp}')">Open</button>
+                    <button class="btn btn-sm btn-secondary" onclick="openForm('${item.ID}', '${item.Timestamp}')">Open</button>
                 </td>
                 <td>
                     <button class="btn btn-sm btn-danger" onclick="deleteRow('${item.ID}', '${item.Timestamp}')">Delete</button>

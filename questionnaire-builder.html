@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questionnaire Builder</title>
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <style>
+    body { background: #f8f9fa; }
+    .container { max-width: 900px; margin-top: 40px; }
+    .question-card { margin-bottom: 1.5rem; transition: box-shadow 0.2s; }
+    .question-card:hover { box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1.5px 6px rgba(0,0,0,0.04); }
+    .navbar-bottom {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        z-index: 9999;
+    }
+    .content {
+        padding-bottom: 60px; /* Adjust this value based on the height of your navbar */
+    }
+    .trigger-info { font-size: 0.9em; color: #888; }
+    .card-header { background: #fff; transition: background 0.2s, box-shadow 0.2s; border-radius: 8px; }
+    .card-header:hover { background: #f0f4ff; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .card-header span.badge { transition: transform 0.2s; }
+    .card-header:hover span.badge { transform: scale(1.08); }
+    .card-header .text-primary { transition: color 0.2s; }
+    .card-header:hover .text-primary { color: #0056b3; }
+    .collapse-anim { max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(.4,0,.2,1), opacity 0.25s; opacity: 0; }
+    .collapse-anim.open { max-height: 2000px; opacity: 1; }
+    .table th, .table td {
+        min-width: 3.6rem;
+        text-align: center;
+    }
+    </style>
+</head>
+<body>
+    <div class="container content">
+        <h1 class="text-center">Questionnaire Builder</h1>
+        <div id="startOptions" class="mb-4">
+            <button class="btn btn-primary" id="startScratchBtn">Start from Scratch</button>
+            <button class="btn btn-secondary" id="editExistingBtn">Edit Existing (question.js)</button>
+        </div>
+        <div id="builderArea" style="display:none;"></div>
+    </div>
+    <div class="navbar navbar-light bg-light navbar-bottom">
+        <div class="container d-flex justify-content-between py-2">
+            <button id="downloadBtn" class="btn btn-primary">Download question.js</button>
+            <button id="resetBtn" class="btn btn-danger">Reset &amp; Start Over</button>
+        </div>
+    </div>
+    <script src="questionnaire-builder.js"></script>
+</body>
+</html>

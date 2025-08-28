@@ -6,6 +6,19 @@
     <title>Dashboard</title>
     <link rel="stylesheet" href="bootstrap.min.css">
     <style>
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+        }
+        .dashboard-card {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(60, 100, 180, 0.10);
+            padding: 2.5rem 2rem 2rem 2rem;
+            margin-top: 2.5rem;
+            margin-bottom: 2.5rem;
+        }
         .overlay {
             position: fixed;
             width: 100%;
@@ -15,81 +28,184 @@
             background-color: rgba(255, 255, 255, 0.8);
             z-index: 9999;
         }
-
         .spinner {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            border: 4px solid #f3f3f3; /* Light grey */
-            border-top: 4px solid #3498db; /* Blue */
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
             border-radius: 50%;
             width: 50px;
             height: 50px;
             animation: spin 1s linear infinite;
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
         .navbar-bottom {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
             z-index: 9999;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 -2px 16px rgba(60,100,180,0.08);
         }
-
         .content {
-            padding-bottom: 60px; /* Adjust this value based on the height of your navbar */
+            padding-bottom: 80px;
+        }
+        .dashboard-card h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #3a4a6b;
+        }
+        .dashboard-card p {
+            color: #4a5a7b;
+            font-size: 1.1rem;
+        }
+        .table-responsive {
+            border-radius: 12px;
+            overflow-x: auto;
+            background: #f8f9fa;
+            box-shadow: 0 2px 8px rgba(60,100,180,0.05);
         }
         .table th, .table td {
             min-width: 3.6rem;
             text-align: center;
+            vertical-align: middle;
+        }
+        .table th {
+            background: #e9ecef;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+        .table-striped tbody tr:hover {
+            background: #e0eafc;
+            transition: background 0.2s;
+        }
+        .form-control {
+            border-radius: 8px;
+            font-size: 1.08rem;
+        }
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            transition: box-shadow 0.2s;
+        }
+        .btn:hover {
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.15);
         }
     </style>
 </head>
 
 <body>
-    <div class="container mt-5 content">
-        <h1>Dashboard of Responses</h1>
-        <p>The data used for generating the dashboard are from past responses stored in Local Storage.</p>
-        
-        <!-- Loading Overlay -->
-        <div id="loadingOverlay" class="overlay">
-            <div class="spinner"></div>
-        </div>
-        
-        <div class="mb-3">
-            <input type="text" id="searchInput" class="form-control" placeholder="Search by ID or Date">
-        </div>
-        
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped">
-                <thead>
-                    <tr id="tableHeaders">
-                        <!-- Headers will be dynamically inserted here -->
-                    </tr>
-                </thead>
-                <tbody id="responseTableBody">
-                    <!-- Data will be inserted here -->
-                </tbody>
-            </table>
+    <div class="container content">
+        <div class="dashboard-card mx-auto" style="max-width: 900px;">
+            <h1 class="mb-3">Dashboard of Responses</h1>
+            <p class="mb-4">The data used for generating the dashboard are from past responses stored in Local Storage.</p>
+            <!-- Loading Overlay -->
+            <div id="loadingOverlay" class="overlay">
+                <div class="spinner"></div>
+            </div>
+            <div class="mb-3">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search by ID or Date">
+            </div>
+            <div class="table-responsive" id="dashboardTableWrapper" style="position:relative;">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr id="tableHeaders">
+                            <!-- Headers will be dynamically inserted here -->
+                        </tr>
+                    </thead>
+                    <tbody id="responseTableBody">
+                        <!-- Data will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <!-- Bottom Navbar -->
     <div class="navbar navbar-light bg-light navbar-bottom">
-        <div class="container d-flex justify-content-between py-2">
-            <button id="clearTableButton" class="btn btn-danger">Clear Table</button>
-            <button id="downloadCsvButton" class="btn btn-primary">Download CSV</button>
-            <button id="goToQuestionnaireButton" class="btn btn-secondary">Go to Questionnaire</button>
+        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center py-2 gap-2">
+
+            <!-- Scroll Controls Centered -->
+            <div class="d-flex flex-column flex-md-row align-items-center justify-content-center mx-auto gap-2" id="scrollButtonsNavbar">
+            <div class="d-flex flex-wrap align-items-center">
+                <label for="scrollSpeedInput" class="me-2 mb-0" style="font-size:0.98rem;">Scroll Speed:</label>
+                <input type="number" id="scrollSpeedInput" class="form-control me-2" style="width:80px;display:inline-block;" min="20" max="500" value="80">
+            </div>
+            <div>
+                <button type="button" class="btn btn-outline-primary mx-2" id="scrollLeftBtnNavbar" title="Scroll Left" style="min-width:48px;">
+                &#8592;
+                </button>
+                <button type="button" class="btn btn-outline-primary mx-2" id="scrollRightBtnNavbar" title="Scroll Right" style="min-width:48px;">
+                &#8594;
+                </button>
+            </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex flex-wrap align-items-center justify-content-center gap-2 w-100">
+            <button id="clearTableButton" class="btn btn-danger flex-grow-1">Clear Table</button>
+            <button id="downloadCsvButton" class="btn btn-primary flex-grow-1">Download CSV</button>
+            <button id="goToQuestionnaireButton" class="btn btn-secondary flex-grow-1">Go to Questionnaire</button>
+            </div>
+
         </div>
     </div>
 
+
     <!-- JavaScript -->
     <script src="dashboard.js"></script>
+    <script>
+    // Scroll buttons logic for navbar with adjustable speed
+    const tableWrapper = document.getElementById('dashboardTableWrapper');
+    const scrollLeftBtnNavbar = document.getElementById('scrollLeftBtnNavbar');
+    const scrollRightBtnNavbar = document.getElementById('scrollRightBtnNavbar');
+    const scrollSpeedInput = document.getElementById('scrollSpeedInput');
+    function getScrollSpeed() {
+        let val = parseInt(scrollSpeedInput.value, 10);
+        if (isNaN(val) || val < 10) return 10;
+        return Math.min(val, 500);
+    }
+    let scrollInterval = null;
+    function startScroll(direction) {
+        if (scrollInterval) return;
+        scrollInterval = setInterval(() => {
+            tableWrapper.scrollBy({ left: direction * getScrollSpeed(), behavior: 'smooth' });
+        }, 80);
+    }
+    function stopScroll() {
+        if (scrollInterval) {
+            clearInterval(scrollInterval);
+            scrollInterval = null;
+        }
+    }
+    if (tableWrapper && scrollLeftBtnNavbar && scrollRightBtnNavbar && scrollSpeedInput) {
+        // Single click scroll
+        scrollLeftBtnNavbar.onclick = function() {
+            tableWrapper.scrollBy({ left: -getScrollSpeed(), behavior: 'smooth' });
+        };
+        scrollRightBtnNavbar.onclick = function() {
+            tableWrapper.scrollBy({ left: getScrollSpeed(), behavior: 'smooth' });
+        };
+        // Hold to scroll
+        scrollLeftBtnNavbar.onmousedown = function() { startScroll(-1); };
+        scrollRightBtnNavbar.onmousedown = function() { startScroll(1); };
+        document.addEventListener('mouseup', stopScroll);
+        scrollLeftBtnNavbar.addEventListener('mouseleave', stopScroll);
+        scrollRightBtnNavbar.addEventListener('mouseleave', stopScroll);
+        // Touch support
+        scrollLeftBtnNavbar.ontouchstart = function(e) { e.preventDefault(); startScroll(-1); };
+        scrollRightBtnNavbar.ontouchstart = function(e) { e.preventDefault(); startScroll(1); };
+        scrollLeftBtnNavbar.ontouchend = stopScroll;
+        scrollRightBtnNavbar.ontouchend = stopScroll;
+    }
+    </script>
 </body>
 </html>
