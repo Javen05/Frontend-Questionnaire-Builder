@@ -1,6 +1,6 @@
 # Frontend-Questionnaire-Builder
 ## Background
-In a previous project, I needed a customizable questionnaire where each response could dynamically determine the next follow-up question. Since no free form builders supported this level of flexibility, I developed a questionnaire rendering engine. To keep it lightweight and accessible, I avoided heavy frameworks or external UI libraries—relying only on Bootstrap. This makes the questionnaire wrapper simple to set up and use, requiring no Node.js or complex configurations, while still offering capabilities beyond standard form builders for informal quizzes and survey that can be conducted using your device.
+In a previous project, I needed a customizable questionnaire where the unique combination of each response determines the follow-up question(s). Since no free form builders supported this level of flexibility, I developed a questionnaire rendering engine to handle the complex logic required. To keep it lightweight and accessible as per my organization's requirements, I did not use heavy frameworks or external UI libraries—relying only on Bootstrap. This makes the questionnaire wrapper simple to set up and use as it requires no Node.js or complex configurations, while still offering capabilities beyond standard form builders for informal quizzes and survey that can be conducted using your device.
 
 
 ## Preview of Software
