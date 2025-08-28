@@ -41,7 +41,7 @@ In a previous project, I needed a customizable questionnaire where the unique co
   <img src="https://github.com/user-attachments/assets/14b814f8-996a-452b-afcd-c60719325556" width="1000" />
 </p>
 
-> *Note: Questionnaire Builder is still under testing — generated templates may contain bugs when used with the questionnaire page.*
+> *Note: Questionnaire Builder is still under testing — generated templates may contain bugs when used with the questionnaire engine.*
 
 ---
 
@@ -86,7 +86,6 @@ In a previous project, I needed a customizable questionnaire where the unique co
 3. Replace the question.js file within the project folder with the newly downloaded one.
 4. Open index.html to use the new questionnaire!
 
-Here’s a polished version of your **NOTICE** section with clearer wording and structure:
 
 ---
 
