@@ -15,8 +15,6 @@ async function loadExistingQuestions() {
     try {
         const res = await fetch('question.js');
         const text = await res.text();
-        // Try to extract the questions object
-        // This is a simple eval, but in production use a parser
         let htmlTitle, title, compulsoryQuestions, questions, conditionalQuestions;
         eval(text);
         return { htmlTitle, title, compulsoryQuestions, questions, conditionalQuestions };
@@ -42,20 +40,20 @@ function resetLocal() {
 function renderStartOptions() {
     document.getElementById('startOptions').style.display = '';
     document.getElementById('builderArea').style.display = 'none';
+    document.getElementById('startScratchBtn').style.display = '';
+    document.getElementById('editExistingBtn').style.display = '';
 }
 function renderBuilder(data) {
     document.getElementById('startOptions').style.display = 'none';
     document.getElementById('builderArea').style.display = '';
+    document.getElementById('startScratchBtn').style.display = 'none';
+    document.getElementById('editExistingBtn').style.display = 'none';
     // Render questionnaire editor
     const area = document.getElementById('builderArea');
     area.innerHTML = '';
-    // Title
     area.appendChild(renderTitleEditor(data));
-    // Questions
     area.appendChild(renderQuestionsEditor(data));
-    // Compulsory Questions (now below questions)
     area.appendChild(renderCompulsoryEditor(data));
-    // Conditional Questions
     area.appendChild(renderConditionalEditor(data));
     // Add extra space at bottom so Download bar doesn't block content
     area.appendChild(document.createElement('div')).style.height = '120px';
@@ -82,7 +80,32 @@ function renderTitleEditor(data) {
 function renderCompulsoryEditor(data) {
     const div = document.createElement('div');
     div.className = 'mb-3';
-    div.innerHTML = `<h4 class="form-label">Compulsory Questions</h4><div id="compQnBadges" style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem; width:100%;"></div>`;
+        div.innerHTML = `<h4 class="form-label">Compulsory Questions</h4><div id="compQnBadges" style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem; width:100%;"></div><div id="compQnWarning" class="alert alert-warning mt-2" style="display:none;">You must add at least one compulsory question. If none is specified, no questions will be shown to users.</div>`;
+        // Add first question as compulsory button
+        const firstQn = data.questions.length > 0 ? data.questions[0].number : null;
+        const addFirstBtn = document.createElement('button');
+        addFirstBtn.className = 'btn btn-outline-primary btn-sm mb-2';
+        addFirstBtn.textContent = 'Make first question Compulsory';
+        addFirstBtn.style.width = '100%';
+        addFirstBtn.style.display = (firstQn && !data.compulsoryQuestions.includes(firstQn) && !data.conditionalQuestions[firstQn]) ? '' : 'none';
+        addFirstBtn.onclick = () => {
+            if (firstQn && !data.compulsoryQuestions.includes(firstQn)) {
+                data.compulsoryQuestions.push(firstQn);
+                saveToLocal(data);
+                renderBuilder(data);
+            }
+        };
+        div.insertBefore(addFirstBtn, div.querySelector('#compQnBadges'));
+        // Show/hide button on badge update
+        function updateAddFirstBtn() {
+            addFirstBtn.style.display = (firstQn && !data.compulsoryQuestions.includes(firstQn) && !data.conditionalQuestions[firstQn]) ? '' : 'none';
+        }
+    // Show warning if no compulsory questions
+    const warningDiv = div.querySelector('#compQnWarning');
+    function updateCompQnWarning() {
+        warningDiv.style.display = (data.compulsoryQuestions.length === 0) ? '' : 'none';
+    }
+    updateCompQnWarning();
     // Badge list
     const badgeDiv = div.querySelector('#compQnBadges');
     // Exclude conditional questions from compulsory
@@ -113,8 +136,10 @@ function renderCompulsoryEditor(data) {
             data.compulsoryQuestions = data.compulsoryQuestions.filter(qn => qn !== btn.getAttribute('data-qn'));
             saveToLocal(data);
             renderBuilder(data);
+            updateAddFirstBtn();
         };
     });
+    updateAddFirstBtn();
     // Add dropdown search (matching conditional UI)
     // Only allow non-conditional questions to be added as compulsory, and not already in conditionalQuestions
     const allNumbers = data.questions.map(q => q.number)
@@ -125,7 +150,7 @@ function renderCompulsoryEditor(data) {
         <div style="width:100%; display:flex; flex-direction:row; gap:0.5rem; align-items:stretch;">
             <div style="position:relative; width:100%;">
                 <input type="text" class="form-control comp-qn-search" placeholder="Search question number..." style="width:100%; height:40px;">
-                <div class="dropdown-menu show" style="max-height:300px;overflow:auto; position:absolute; left:0; right:0; bottom:100%; z-index:99999;"></div>
+                <div class="dropdown-menu show" style="max-height:300px;overflow:auto; position:absolute; left:0; right:0; bottom:100%; z-index:99999; width:100%; min-width:unset;"></div>
             </div>
             <button class="btn btn-primary add-comp-btn" style="height:40px;">Add</button>
         </div>
@@ -134,6 +159,13 @@ function renderCompulsoryEditor(data) {
     const menu = searchDiv.querySelector('.dropdown-menu');
     const addBtn = searchDiv.querySelector('.add-comp-btn');
     function updateMenu() {
+    // Ensure dropdown matches input width
+    function positionCompQnDropdown() {
+        menu.style.width = input.offsetWidth + 'px';
+    }
+    input.addEventListener('focus', positionCompQnDropdown);
+    input.addEventListener('input', positionCompQnDropdown);
+    window.addEventListener('resize', positionCompQnDropdown);
         const val = input.value.toLowerCase();
         menu.innerHTML = allNumbers.filter(n => n.toLowerCase().includes(val)).map(n => {
             const qObj = data.questions.find(q => q.number === n);
@@ -326,6 +358,7 @@ function renderQuestionCard(q, idx, data) {
             <option value="radio">Radio</option>
             <option value="dropdown">Dropdown</option>
         </select>
+        <div class="question-type-info alert alert-info py-2 px-3 mb-2" style="font-size:0.95em;"></div>
         <label>Question</label>
         <input type="text" class="form-control mb-2" value="${q.question || ''}">
         <label>Hint (optional)</label>
@@ -341,6 +374,28 @@ function renderQuestionCard(q, idx, data) {
             <button class="btn btn-sm btn-outline-secondary mt-1">Add Option</button>
         </div>
     </div>`;
+    // Info text for each type
+    const infoTexts = {
+        display: 'Display static information or instructions; no user input allowed for this question type.',
+        response: 'Accepts free text input which will be used as the value. You may also choose to include predefined options with fixed values for users to choose from.',
+        sort: 'User can rank the provided options, with top option being the most important/first. For trigger conditions, the trigger question will activate if the user ranks that option as the top choice.',
+        checkbox: 'User can select multiple options - and all selected options\' triggers will activate.',
+        radio: 'User can only select one option.',
+        dropdown: 'User can only select one option.'
+    };
+    const infoDiv = card.querySelector('.question-type-info');
+    const typeSel = card.querySelector('select');
+    function updateInfo() {
+        infoDiv.textContent = infoTexts[q.inputType] || '';
+    }
+    updateInfo();
+    typeSel.value = q.inputType;
+    typeSel.onchange = e => {
+        q.inputType = e.target.value;
+        saveToLocal(data);
+        updateInfo();
+        renderBuilder(data);
+    };
     // Delete
     card.querySelector('.btn-danger').onclick = () => {
         data.questions.splice(idx, 1);
@@ -397,14 +452,7 @@ function renderQuestionCard(q, idx, data) {
             window.scrollTo({ top: scrollY });
         }
     };
-    // Type
-    const typeSel = card.querySelector('select');
-    typeSel.value = q.inputType;
-    typeSel.onchange = e => {
-        q.inputType = e.target.value;
-        saveToLocal(data);
-        renderBuilder(data);
-    };
+    // Type (already declared above)
     // Question
     card.querySelectorAll('input[type="text"]')[1].oninput = e => {
         q.question = e.target.value;
@@ -711,9 +759,8 @@ function renderConditionalEditor(data) {
                         const options = selectedQObj.options || [];
                         valueCell.innerHTML = `<div class='d-flex flex-wrap gap-2'>${options.map(opt => {
                             const checked = Array.isArray(vals) && vals.includes(opt.value) ? 'checked' : '';
-                            return `<label class='form-check-label'><input type='checkbox' class='form-check-input cond-checkbox' value='${opt.value}' ${checked}> ${opt.value} <span class='text-muted'>${opt.label}</span></label>`;
+                            return `<label class='form-check-label'><input type='checkbox' class='form-check-input' value='${opt.value}' ${checked}> ${opt.value} <span class='text-muted'>${opt.label}</span></label>`;
                         }).join('')}</div>`;
-                        // ...existing code...
                         return;
                     }
                     if (selectedQObj.inputType === 'sort') {
@@ -783,8 +830,8 @@ function renderConditionalEditor(data) {
                         const valInput = tr.querySelector('.value-edit-cell input');
                         newVals = valInput.value.split(',').map(v => v.trim()).filter(Boolean);
                     } else if (selectedQObj.inputType === 'checkbox') {
-                        // Collect checked values
-                        newVals = Array.from(tr.querySelectorAll('.cond-checkbox:checked')).map(cb => cb.value);
+                        // Collect checked values (edit UI uses form-check-input, not cond-checkbox)
+                        newVals = Array.from(tr.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
                     } else if (selectedQObj.inputType === 'sort') {
                         // Collect value from dropdown search input (single value)
                         const valInput = tr.querySelector('.value-search');
@@ -819,13 +866,33 @@ function renderConditionalEditor(data) {
         addCondDiv.className = 'mt-2';
         addCondDiv.innerHTML = `
             <div style="position:relative; display:inline-block; width:100%;">
-                <input type="text" class="form-control mb-1 cond-qn-search" placeholder="Search question number...">
+                <input type="text" class="form-control mb-1 cond-qn-search" placeholder="Search question number..." style="padding-right:2.2em;">
+                <button type="button" class="btn btn-light btn-sm cond-qn-clear-btn" style="position:absolute; right:6px; top:50%; transform:translateY(-50%); z-index:10000; display:none; border-radius:50%; width:28px; height:28px; padding:0;">
+                    <span style="font-size:1.2em;">&times;</span>
+                </button>
                 <div class="dropdown-menu show" style="max-height:100px;overflow:auto; position:absolute; left:0; right:0; top:100%; z-index:99999;"></div>
             </div>
             <div style="width:100%; display:flex; flex-direction:row; gap:0.5rem; align-items:stretch; padding-bottom:12px;">
                 <div class="cond-value-field" style="flex:1 1 auto; min-height:40px;"></div>
                 <button class="btn btn-sm btn-success" style="min-height:40px; padding-top:8px; padding-bottom:8px;">Add Condition</button>
             </div>`;
+        const qnInputClear = addCondDiv.querySelector('.cond-qn-search');
+        const clearQnBtn = addCondDiv.querySelector('.cond-qn-clear-btn');
+        function updateQnClearBtn() {
+            clearQnBtn.style.display = qnInputClear.value ? '' : 'none';
+        }
+        qnInputClear.addEventListener('input', updateQnClearBtn);
+        qnInputClear.addEventListener('focus', updateQnClearBtn);
+        clearQnBtn.onclick = function() {
+            qnInputClear.value = '';
+            qnInputClear.dispatchEvent(new Event('input'));
+            setTimeout(() => {
+                qnInputClear.focus();
+                menu.style.display = 'block';
+            }, 10);
+            updateQnClearBtn();
+        };
+        updateQnClearBtn();
         const qnInput = addCondDiv.querySelector('.cond-qn-search');
         const menu = addCondDiv.querySelector('.dropdown-menu');
         const valueField = addCondDiv.querySelector('.cond-value-field');
@@ -871,10 +938,52 @@ function renderConditionalEditor(data) {
             }
             // Other types: dropdown search for valid values
             const options = qObj.options || [];
-            valueField.innerHTML = `<div class='dropdown'>
-                <input type='text' class='form-control cond-value-input' placeholder='Search value...'>
-                <div class='dropdown-menu show' style='max-height:150px;overflow:auto;'></div>
+            valueField.innerHTML = `<div class='dropdown' style='width:100%; position:relative; display:flex; align-items:center;'>
+                <input type='text' class='form-control cond-value-input' placeholder='Search value...' style='width:100%; padding-right:2.2em;'>
+                <button type='button' class='btn btn-light btn-sm cond-clear-btn' style='position:absolute; right:6px; top:50%; transform:translateY(-50%); z-index:10000; display:none; border-radius:50%; width:28px; height:28px; padding:0;'><span style='font-size:1.2em;'>&times;</span></button>
+                <div class='dropdown-menu show cond-value-dropdown' style='max-height:180px; min-height:48px; overflow:auto; width:100%; min-width:unset; left:0; right:0; position:absolute; bottom:100%; z-index:2147483647; box-shadow:0 -4px 16px rgba(0,0,0,0.12); border-radius:0.5rem; padding:6px 0;'></div>
             </div>`;
+            const valueInputClear = valueField.querySelector('.cond-value-input');
+            const valueMenuClear = valueField.querySelector('.cond-value-dropdown');
+            const clearBtn = valueField.querySelector('.cond-clear-btn');
+            function positionDropdownMenu() {
+                if (!valueMenuClear || !valueInputClear) return;
+                // Always position dropdown above input
+                valueMenuClear.style.top = '';
+                valueMenuClear.style.bottom = '100%';
+                valueMenuClear.style.boxShadow = '0 -4px 16px rgba(0,0,0,0.12)';
+                valueMenuClear.style.width = valueInputClear.offsetWidth + 'px';
+            }
+            valueInputClear.addEventListener('focus', positionDropdownMenu);
+            valueInputClear.addEventListener('input', positionDropdownMenu);
+            window.addEventListener('resize', positionDropdownMenu);
+            // Show/hide clear button
+            function updateClearBtn() {
+                clearBtn.style.display = valueInputClear.value ? '' : 'none';
+            }
+            valueInputClear.addEventListener('input', updateClearBtn);
+            valueInputClear.addEventListener('focus', updateClearBtn);
+            clearBtn.onclick = function() {
+                valueInputClear.value = '';
+                valueInputClear.dispatchEvent(new Event('input'));
+                valueMenuClear.style.display = 'block';
+                valueInputClear.focus();
+                updateClearBtn();
+            };
+            // Popup positioning logic
+            const valueInputPos = valueField.querySelector('.cond-value-input');
+            const valueMenuPos = valueField.querySelector('.dropdown-menu');
+            function positionDropdownMenu() {
+                if (!valueMenuPos || !valueInputPos) return;
+                // Always position dropdown above input
+                valueMenuPos.style.top = '';
+                valueMenuPos.style.bottom = '100%';
+                valueMenuPos.style.boxShadow = '0 -4px 16px rgba(0,0,0,0.12)';
+                valueMenuPos.style.width = valueInputPos.offsetWidth + 'px';
+            }
+            valueInputPos.addEventListener('focus', positionDropdownMenu);
+            valueInputPos.addEventListener('input', positionDropdownMenu);
+            window.addEventListener('resize', positionDropdownMenu);
             const valueInput = valueField.querySelector('.cond-value-input');
             const valueMenu = valueField.querySelector('.dropdown-menu');
             function updateValueMenu() {
@@ -949,13 +1058,17 @@ function renderConditionalEditor(data) {
         const delBtn = document.createElement('button');
         delBtn.className = 'btn btn-sm btn-danger mt-2';
         delBtn.style.minHeight = '40px';
+        delBtn.style.width = '100%';
         delBtn.style.paddingTop = '8px';
         delBtn.style.paddingBottom = '8px';
         delBtn.textContent = 'Delete Conditional Question';
         delBtn.onclick = () => {
-            delete data.conditionalQuestions[cqKey];
-            saveToLocal(data);
-            renderBuilder(data);
+            // add a confirmation dialog
+            if (confirm('Are you sure you want to delete this conditional question?')) {
+                delete data.conditionalQuestions[cqKey];
+                saveToLocal(data);
+                renderBuilder(data);
+            }
         };
         details.appendChild(delBtn);
         // Collapsible logic
@@ -985,10 +1098,10 @@ function renderConditionalEditor(data) {
     addNewDiv.innerHTML = `
         <div style="width:100%; display:flex; flex-direction:row; gap:0.5rem; align-items:stretch;">
             <div style="position:relative; width:100%;">
-                <input type="text" class="form-control new-qn-search" placeholder="Search conditional question number..." style="width:100%; height:40px;">
+                <input type="text" class="form-control new-qn-search" placeholder="Search conditional question number..." style="width:100%; min-height:40px;">
                 <div class="dropdown-menu show" style="max-height:300px;overflow:auto; position:absolute; left:0; right:0; bottom:100%; z-index:99999;"></div>
             </div>
-            <button class="btn btn-secondary add-cond-btn" style="height:40px;">Add</button>
+            <button class="btn btn-secondary add-cond-btn" style="min-height:40px;">Add</button>
         </div>
         <div class="text-danger small mb-1" style="display:none;" id="newQnError"></div>
     `;
@@ -1086,20 +1199,43 @@ window.onload = async function() {
     else renderBuilder(data);
 
     document.getElementById('startScratchBtn').onclick = () => {
+        document.getElementById('startScratchBtn').style.display = 'none';
+        document.getElementById('editExistingBtn').style.display = 'none';
         data = JSON.parse(JSON.stringify(DEFAULT_QUESTIONNAIRE));
         saveToLocal(data);
         renderBuilder(data);
     };
     document.getElementById('editExistingBtn').onclick = async () => {
+        document.getElementById('startScratchBtn').style.display = 'none';
+        document.getElementById('editExistingBtn').style.display = 'none';
         data = await loadExistingQuestions();
         saveToLocal(data);
         renderBuilder(data);
     };
     document.getElementById('downloadBtn').onclick = () => {
+        if (data.compulsoryQuestions.length === 0) {
+            alert('You must add at least one compulsory question before downloading. No questions will be shown if none is specified.');
+            return;
+        }
+        if (!data.htmlTitle || !data.htmlTitle.trim()) {
+            alert('HTML Title is required before downloading.');
+            return;
+        }
+        if (!data.title || !data.title.trim()) {
+            alert('Questionnaire Title is required before downloading.');
+            return;
+        }
+        if (!confirm('Are you sure you want to download your questionnaire?')) return;
         downloadQuestionJS(data);
+        document.getElementById('startScratchBtn').style.display = '';
+        document.getElementById('editExistingBtn').style.display = '';
     };
     document.getElementById('resetBtn').onclick = () => {
-        resetLocal();
-        renderStartOptions();
+        if (confirm('Are you sure you want to reset and clear all your progress? This cannot be undone.')) {
+            resetLocal();
+            renderStartOptions();
+            document.getElementById('startScratchBtn').style.display = '';
+            document.getElementById('editExistingBtn').style.display = '';
+        }
     };
 };
