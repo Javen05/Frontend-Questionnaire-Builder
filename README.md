@@ -37,8 +37,9 @@ During my internship, I built a questionnaire where your unique response for eac
 ### 5. Web and Mobile Responsive
 
 
-### 6. Edtior interface to build Questionnaire (NEW)
+### 6. Editor interface to build Questionnaire (NEW)
   - User friendly GUI to build your complex questionnaires.
+  - [Test out Builder](https://javen05.github.io/Frontend-Questionnaire-Builder/questionnaire-builder.html)
 
 ## Usage
 0. Download all files and store in a folder
