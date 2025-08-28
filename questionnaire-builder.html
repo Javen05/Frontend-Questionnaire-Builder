@@ -38,16 +38,16 @@
 <body>
     <div class="container content">
         <h1 class="text-center">Questionnaire Builder</h1>
-        <div id="startOptions" class="mb-4">
-            <button class="btn btn-primary" id="startScratchBtn">Start from Scratch</button>
-            <button class="btn btn-secondary" id="editExistingBtn">Edit Existing (question.js)</button>
+        <div id="startOptions" class="mb-4 d-flex flex-column flex-md-row justify-content-center align-items-center gap-3">
+            <button class="btn btn-primary px-4 py-2 fw-semibold shadow-sm" id="startScratchBtn" style="min-width:180px;">Start from Scratch</button>
+            <button class="btn btn-secondary px-4 py-2 fw-semibold shadow-sm" id="editExistingBtn" style="min-width:220px;">Edit Existing (question.js)</button>
         </div>
         <div id="builderArea" style="display:none;"></div>
     </div>
     <div class="navbar navbar-light bg-light navbar-bottom">
-        <div class="container d-flex justify-content-between py-2">
-            <button id="downloadBtn" class="btn btn-primary">Download question.js</button>
-            <button id="resetBtn" class="btn btn-danger">Reset &amp; Start Over</button>
+        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center py-2 gap-2">
+            <button id="downloadBtn" class="btn btn-primary px-4 py-2 fw-semibold shadow-sm mb-2 mb-md-0" style="min-width:180px;">Download question.js</button>
+            <button id="resetBtn" class="btn btn-danger px-4 py-2 fw-semibold shadow-sm mb-2 mb-md-0" style="min-width:180px;">Reset &amp; Start Over</button>
         </div>
     </div>
     <script src="questionnaire-builder.js"></script>
