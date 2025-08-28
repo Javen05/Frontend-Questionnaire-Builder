@@ -4,89 +4,121 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Questionnaire</title>
-    <style>
-        .overlay {
-        position: fixed;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        background-color: rgba(255, 255, 255, 0.8);
-        z-index: 9999;
-        }
-
-        .spinner {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        border: 4px solid #f3f3f3; /* Light grey */
-        border-top: 4px solid #3498db; /* Blue */
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-        }
-
-        .sortable-list {
-          list-style: none;
-          padding: 0;
-          margin: 0;
-        }
-        .sortable-list li {
-          padding: 8px;
-          margin-bottom: 4px;
-          background: #f0f0f0;
-          border: 1px solid #ddd;
-          cursor: move;
-        }
-        .sortable-list li.dragging {
-          opacity: 0.5;
-        }
-    </style>
+  <style>
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+      font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+    }
+    .main-card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(60, 100, 180, 0.10);
+      padding: 2.5rem 2rem 2rem 2rem;
+      margin-top: 2.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .overlay {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      background-color: rgba(255, 255, 255, 0.8);
+      z-index: 9999;
+    }
+    .spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .form-group, .form-check {
+      margin-bottom: 1.5rem;
+    }
+    .btn-primary, .btn-secondary, .btn-outline-secondary {
+      border-radius: 8px;
+      font-weight: 500;
+      transition: box-shadow 0.2s;
+    }
+    .btn-primary:hover, .btn-secondary:hover, .btn-outline-secondary:hover {
+      box-shadow: 0 2px 8px rgba(52, 152, 219, 0.15);
+    }
+    .d-grid .btn {
+      font-size: 1.15rem;
+      padding: 0.75rem 0;
+    }
+    #questionnaireTitle {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #3a4a6b;
+    }
+    #questionContainer {
+      margin-top: 1.5rem;
+    }
+    .sortable-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .sortable-list li {
+      padding: 8px;
+      margin-bottom: 4px;
+      background: #f0f0f0;
+      border: 1px solid #ddd;
+      cursor: move;
+      border-radius: 6px;
+    }
+    .sortable-list li.dragging {
+      opacity: 0.5;
+    }
+  </style>
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="bootstrap.min.css">
 </head>
 
 <body>
-    <div class="container">
-        <br> <h1 id="questionnaireTitle" style="text-align: center;">Questions</h1> <br>
-        <form id="questionForm">
-            <!-- Loading Overlay -->
-            <div id="loadingOverlay" class="overlay">
-                <div class="spinner"></div>
-            </div>
-              
-            <!-- Reusable Question Component -->
-            <div id="questionContainer"></div>
-
-            <!-- Confirmation/Completion Check -->
-            <div class="form-group mt-3">
-                <b class="fs-5">Please ensure all questions are answered before submission.</b>
-                <br>
-                <span id="countOfUnansweredQuestions" class=" mt-2 fs-6 text-danger d-none">
-                  There are <span id="countOfUnansweredQuestionsValue" class="fs-4">0</span> unanswered question(s).
-                </span>
-              </div>
-              
-              <div class="form-check mt-2">
-                <input type="checkbox" class="btn-check" id="btn-check-2-outlined">
-                <label class="btn btn-outline-secondary float-end" for="btn-check-2-outlined">Skip Check</label>
-              </div>
-              
-              <!-- Submit Button -->
-              <div class="d-grid gap-2 mt-4 mb-4">
-                <button type="submit" class="btn btn-primary" id="btn-submit" disabled>Submit</button>
-              </div>              
-            </div>
-        </form>
+  <div class="container">
+    <div class="main-card mx-auto" style="max-width: 650px;">
+      <h1 id="questionnaireTitle" class="mb-4 text-center">Questions</h1>
+      <form id="questionForm">
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="overlay">
+          <div class="spinner"></div>
+        </div>
+        <!-- Reusable Question Component -->
+        <div id="questionContainer"></div>
+        <!-- Confirmation/Completion Check -->
+        <div class="form-group mt-3">
+          <b class="fs-5">Please ensure all questions are answered before submission.</b>
+          <br>
+          <span id="countOfUnansweredQuestions" class="mt-2 fs-6 text-danger d-none">
+            There are <span id="countOfUnansweredQuestionsValue" class="fs-4">0</span> unanswered question(s).
+          </span>
+        </div>
+        <div class="form-check mt-2">
+          <input type="checkbox" class="btn-check" id="btn-check-2-outlined">
+          <label class="btn btn-outline-secondary float-end" for="btn-check-2-outlined">Skip Check</label>
+        </div>
+        <!-- Submit Button -->
+        <div class="d-grid gap-2 mt-4 mb-4">
+          <button type="submit" class="btn btn-primary" id="btn-submit" disabled>Submit</button>
+        </div>
+      </form>
     </div>
+  </div>
 
     <!-- JavaScript -->
     <script src="question.js"></script>
