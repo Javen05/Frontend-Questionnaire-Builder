@@ -58,9 +58,7 @@ function renderBuilder(data) {
     // Conditional Questions
     area.appendChild(renderConditionalEditor(data));
     // Add extra space at bottom so Download bar doesn't block content
-    const spacer = document.createElement('div');
-    spacer.style.height = '80px';
-    area.appendChild(spacer);
+    area.appendChild(document.createElement('div')).style.height = '120px';
 }
 
 function renderTitleEditor(data) {
@@ -719,36 +717,31 @@ function renderConditionalEditor(data) {
                         return;
                     }
                     if (selectedQObj.inputType === 'sort') {
-                        // Sortable list for sort type
+                        // Treat sort like dropdown for condition editing
                         const options = selectedQObj.options || [];
-                        valueCell.innerHTML = `<ul class='list-group cond-sort-list'>${options.map(opt => {
-                            return `<li class='list-group-item cond-sort-item' draggable='true' data-val='${opt.value}'>${opt.value} <span class='text-muted'>${opt.label}</span></li>`;
-                        }).join('')}</ul>
-                        <small class='text-muted'>Drag to reorder. Only selected order will be saved.</small>`;
-                        // ...existing code...
-                        // Add drag-and-drop logic
-                        const list = valueCell.querySelector('.cond-sort-list');
-                        let dragSrc = null;
-                        list.querySelectorAll('.cond-sort-item').forEach(item => {
-                            item.addEventListener('dragstart', function(e) {
-                                dragSrc = this;
-                                e.dataTransfer.effectAllowed = 'move';
+                        valueCell.innerHTML = `<div class='dropdown'>
+                            <input type='text' class='form-control form-control-sm value-search' value='${Array.isArray(vals) ? vals.join(',') : vals}' placeholder='Search value...'>
+                            <div class='dropdown-menu show' style='max-height:150px;overflow:auto;'></div>
+                        </div>`;
+                        const valueInput = valueCell.querySelector('.value-search');
+                        const valueMenu = valueCell.querySelector('.dropdown-menu');
+                        function updateValueMenu() {
+                            const val = valueInput.value.toLowerCase();
+                            valueMenu.innerHTML = options.filter(opt => (String(opt.value || '')).toLowerCase().includes(val) || (opt.label || '').toLowerCase().includes(val)).map(opt => {
+                                return `<button class='dropdown-item' type='button' data-val='${opt.value}'>${opt.value} - ${opt.label}</button>`;
+                            }).join('');
+                            valueMenu.querySelectorAll('button').forEach(btn => {
+                                btn.onclick = () => {
+                                    valueInput.value = btn.getAttribute('data-val');
+                                    updateValueMenu();
+                                };
                             });
-                            item.addEventListener('dragover', function(e) {
-                                e.preventDefault();
-                                this.classList.add('bg-info');
-                            });
-                            item.addEventListener('dragleave', function(e) {
-                                this.classList.remove('bg-info');
-                            });
-                            item.addEventListener('drop', function(e) {
-                                e.preventDefault();
-                                this.classList.remove('bg-info');
-                                if (dragSrc !== this) {
-                                    list.insertBefore(dragSrc, this.nextSibling);
-                                }
-                            });
-                        });
+                        }
+                        valueInput.oninput = updateValueMenu;
+                        valueInput.onfocus = () => { valueMenu.style.display = 'block'; updateValueMenu(); };
+                        valueInput.onblur = () => { setTimeout(() => { valueMenu.style.display = 'none'; }, 150); };
+                        valueMenu.style.display = 'none';
+                        updateValueMenu();
                         return;
                     }
                     // For other types, dropdown search for valid values
@@ -793,8 +786,11 @@ function renderConditionalEditor(data) {
                         // Collect checked values
                         newVals = Array.from(tr.querySelectorAll('.cond-checkbox:checked')).map(cb => cb.value);
                     } else if (selectedQObj.inputType === 'sort') {
-                        // Collect sorted order
-                        newVals = Array.from(tr.querySelectorAll('.cond-sort-item')).map(li => li.getAttribute('data-val'));
+                        // Collect value from dropdown search input (single value)
+                        const valInput = tr.querySelector('.value-search');
+                        newVals = valInput.value ? [valInput.value.trim()] : [];
+                        // Only allow valid values
+                        newVals = newVals.filter(v => (selectedQObj.options || []).some(opt => opt.value == v));
                     } else {
                         const valInput = tr.querySelector('.value-search');
                         newVals = valInput.value.split(',').map(v => v.trim()).filter(Boolean);
@@ -833,9 +829,9 @@ function renderConditionalEditor(data) {
         const qnInput = addCondDiv.querySelector('.cond-qn-search');
         const menu = addCondDiv.querySelector('.dropdown-menu');
         const valueField = addCondDiv.querySelector('.cond-value-field');
-        // Only allow non-compulsory questions to be added as conditional
+        // Allow all other questions except itself
         const allNumbers = data.questions.map(q => q.number)
-            .filter(n => !data.compulsoryQuestions.includes(n));
+            .filter(n => n !== cqKey);
         function updateMenu() {
             const val = qnInput.value.toLowerCase();
             menu.innerHTML = allNumbers.filter(n => n.toLowerCase().includes(val)).map(n => {
@@ -871,37 +867,6 @@ function renderConditionalEditor(data) {
                 valueField.innerHTML = `<div class='d-flex flex-wrap gap-2 mb-1'>${options.map(opt => {
                     return `<label class='form-check-label'><input type='checkbox' class='form-check-input cond-checkbox' value='${opt.value}'> ${opt.value} <span class='text-muted'>${opt.label}</span></label>`;
                 }).join('')}</div>`;
-                return;
-            }
-            if (qObj.inputType === 'sort') {
-                const options = qObj.options || [];
-                valueField.innerHTML = `<ul class='list-group cond-sort-list mb-1'>${options.map(opt => {
-                    return `<li class='list-group-item cond-sort-item' draggable='true' data-val='${opt.value}'>${opt.value} <span class='text-muted'>${opt.label}</span></li>`;
-                }).join('')}</ul>
-                <small class='text-muted'>Drag to reorder. Only selected order will be saved.</small>`;
-                // Drag-and-drop logic
-                const list = valueField.querySelector('.cond-sort-list');
-                let dragSrc = null;
-                list.querySelectorAll('.cond-sort-item').forEach(item => {
-                    item.addEventListener('dragstart', function(e) {
-                        dragSrc = this;
-                        e.dataTransfer.effectAllowed = 'move';
-                    });
-                    item.addEventListener('dragover', function(e) {
-                        e.preventDefault();
-                        this.classList.add('bg-info');
-                    });
-                    item.addEventListener('dragleave', function(e) {
-                        this.classList.remove('bg-info');
-                    });
-                    item.addEventListener('drop', function(e) {
-                        e.preventDefault();
-                        this.classList.remove('bg-info');
-                        if (dragSrc !== this) {
-                            list.insertBefore(dragSrc, this.nextSibling);
-                        }
-                    });
-                });
                 return;
             }
             // Other types: dropdown search for valid values
@@ -962,8 +927,6 @@ function renderConditionalEditor(data) {
                 vals = valInput.value.split(',').map(v => v.trim()).filter(Boolean);
             } else if (qObj.inputType === 'checkbox') {
                 vals = Array.from(addCondDiv.querySelectorAll('.cond-checkbox:checked')).map(cb => cb.value);
-            } else if (qObj.inputType === 'sort') {
-                vals = Array.from(addCondDiv.querySelectorAll('.cond-sort-item')).map(li => li.getAttribute('data-val'));
             } else {
                 const valInput = addCondDiv.querySelector('.cond-value-input');
                 vals = valInput.value.split(',').map(v => v.trim()).filter(Boolean);
@@ -1056,7 +1019,7 @@ function renderConditionalEditor(data) {
     addCondBtn.onclick = () => {
         const qn = newQnInput.value.trim();
         if (!qn) {
-            errorDiv.textContent = 'Please enter a question number.';
+            errorDiv.textContent = 'Please enter a valid question number.';
             errorDiv.style.display = '';
             return;
         }
