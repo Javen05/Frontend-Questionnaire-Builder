@@ -75,17 +75,29 @@ In a previous project, I needed a customizable questionnaire where the unique co
 ### 5. Web and Mobile Responsive
 
 
-### 6. Editor interface to build Questionnaire (NEW)
+### 6. User Interface to build Questionnaire (NEW)
   - User friendly GUI to build your complex questionnaires.
   - [Test out Builder](https://javen05.github.io/Frontend-Questionnaire-Builder/questionnaire-builder.html)
 
 ## Usage
 0. Download all files and store in a folder
-1. Open editor.html to build your questionnaire.
-2. Export to question.js (download questions) after completing your questionnaire in editor.html.
-3. Replace the question.js file with the newly downloaded one.
-4. Open index.html to use questionnaire.
+1. Open questionnaire-builder.html to: build a new questionnaire | edit your existing questionnaire.
+2. Download questions (question.js) after completing your questionnaire in questionnaire-builder.html.
+3. Replace the question.js file within the project folder with the newly downloaded one.
+4. Open index.html to use the new questionnaire!
 
-## Notes for usage:
-  - If you are hosting the website, exclude questionnaire-builder.js and questionnaire-builder.html to hide the answers and logic of questions' trigger from user.
-  - As the questionnaire engine runs on the frontend, tech-savvy users can reverse engineer question.js on their browser; therefore, this questionnaire should not be used for any formal or graded tests etc.
+Here’s a polished version of your **NOTICE** section with clearer wording and structure:
+
+---
+
+## ⚠️ Notice for Usage
+* This questionnaire engine runs entirely on the **frontend**. Any logic defined within it can be accessed and reverse-engineered by users, so it **should not** be used for formal assessments, graded tests, or any use case where secrecy and security is required.
+* If you plan to integrate this questionnaire engine with your **own backend** for secure grading or evaluation:
+
+  * **Do not** assign scores directly in the `value` field, as these can be easily inspected by users.
+  * Instead, assign each option a unique **ID** as its value and let your backend handle the mapping of IDs to scores.
+
+## Recommended use-cases
+- Informal quizzes for learning, self-checks, or entertainment.
+- Data collection surveys/tests conducted on your own device where you can directly monitor participants’ usage and prevent them from inspecting the source code.
+- Surveys (just hook submission action with your database endpoint to capture responses from different devices).
