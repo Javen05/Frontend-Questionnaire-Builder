@@ -1,8 +1,30 @@
 # Frontend-Questionnaire-Builder
-![image](https://github.com/user-attachments/assets/3d7d59fc-aa35-4048-b657-38a0fe5514a4)
 
-![image](https://github.com/user-attachments/assets/7e547853-432d-450f-8d96-dd2cf7036188)
+## Demo
+### Questionnaire Page
+#### Prevent empty form submission; user must answer at least 1 question to enable submit button
+<img width="1919" height="996" alt="image" src="https://github.com/user-attachments/assets/1cede426-e047-422a-8f4a-7acdb69b3774" />
 
+#### Prevent user from submitting empty form; can be bypassed by clicking 'Skip Check'
+<img width="1919" height="994" alt="image" src="https://github.com/user-attachments/assets/d75c8090-8d57-4203-b88c-e7933579e32a" />
+
+#### Record each submission with an Identifier/Name
+<img width="1919" height="997" alt="image" src="https://github.com/user-attachments/assets/396a49df-f92d-478e-a06c-2fa3fe2b5ee2" />
+
+### Dashboard Page
+<img width="1919" height="992" alt="image" src="https://github.com/user-attachments/assets/457bbec6-ac87-4ff5-b23b-356bd7f41198" />
+
+- View all submissions on this device (stored in local storage)
+- Able to download data
+- Searchbar to find specific record
+- Left/Right toggle buttons to scroll horizontally for huge questionnaires with many questions/columns
+
+### Questionnaire Builder Page
+<img width="1919" height="995" alt="image" src="https://github.com/user-attachments/assets/285c0f25-d225-4ff8-b26b-2d2cde972800" />
+<img width="1919" height="998" alt="image" src="https://github.com/user-attachments/assets/149d9a83-f5cc-46bc-8263-af20cadb27c5" />
+<img width="1919" height="995" alt="image" src="https://github.com/user-attachments/assets/14b814f8-996a-452b-afcd-c60719325556" />
+
+> Have yet to test Questionnaire Builder, so there might be bugs when using the generated template with questionnaire page.
 
 ## Background
 During my internship, I built a questionnaire where your unique response for each question leads you to a different follow-up question. Decided to share this questionnaire wrapper for individuals who need a questionnaire beyond the capabilities of basic questionnaire forms.
