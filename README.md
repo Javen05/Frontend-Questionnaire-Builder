@@ -1,35 +1,51 @@
 # Frontend-Questionnaire-Builder
-
-## Demo
-### Questionnaire Page
-#### Prevent empty form submission; user must answer at least 1 question to enable submit button
-<img width="1919" height="996" alt="image" src="https://github.com/user-attachments/assets/1cede426-e047-422a-8f4a-7acdb69b3774" />
-
-#### Prevent user from submitting empty form; can be bypassed by clicking 'Skip Check'
-<img width="1919" height="994" alt="image" src="https://github.com/user-attachments/assets/d75c8090-8d57-4203-b88c-e7933579e32a" />
-
-#### Record each submission with an Identifier/Name
-<img width="1919" height="997" alt="image" src="https://github.com/user-attachments/assets/396a49df-f92d-478e-a06c-2fa3fe2b5ee2" />
-
-### Dashboard Page
-<img width="1919" height="992" alt="image" src="https://github.com/user-attachments/assets/457bbec6-ac87-4ff5-b23b-356bd7f41198" />
-
-- View all saved submissions from this device (stored in local storage), with the option to open and review each submission individually in the form
-- Able to download data
-- Searchbar to find specific record (Filter by ID and Timestamp column)
-- Left/Right toggle buttons to scroll horizontally for huge questionnaires with many questions/columns
-
-### Questionnaire Builder Page
-<img width="1919" height="995" alt="image" src="https://github.com/user-attachments/assets/285c0f25-d225-4ff8-b26b-2d2cde972800" />
-<img width="1919" height="998" alt="image" src="https://github.com/user-attachments/assets/149d9a83-f5cc-46bc-8263-af20cadb27c5" />
-<img width="1919" height="995" alt="image" src="https://github.com/user-attachments/assets/14b814f8-996a-452b-afcd-c60719325556" />
-
-> Have yet to test Questionnaire Builder, so there might be bugs when using the generated template with questionnaire page.
-
 ## Background
 In a previous project, I needed a customizable questionnaire where each response could dynamically determine the next follow-up question. Since no free form builders supported this level of flexibility, I developed a questionnaire rendering engine. To keep it lightweight and accessible, I avoided heavy frameworks or external UI libraries—relying only on Bootstrap. This makes the questionnaire wrapper simple to set up and use, requiring no Node.js or complex configurations, while still offering capabilities beyond standard form builders for informal quizzes and survey that can be conducted using your device.
 
-### Updates:
+
+## Preview of Software
+### Questionnaire Page
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/1cede426-e047-422a-8f4a-7acdb69b3774" width="500" />
+  <img src="https://github.com/user-attachments/assets/d75c8090-8d57-4203-b88c-e7933579e32a" width="500" />
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/396a49df-f92d-478e-a06c-2fa3fe2b5ee2" width="1000" />
+</p>
+
+---
+
+### Dashboard Page
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/457bbec6-ac87-4ff5-b23b-356bd7f41198" width="1000" />
+</p>
+
+* View all saved submissions from this device (stored in local storage), with the option to open and review each submission individually in the form
+* Download data as file
+* Search bar to find specific records (filter by **ID** and **Timestamp** column)
+* Left/Right toggle buttons to scroll horizontally for large questionnaires
+
+---
+
+### Questionnaire Builder Page
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/285c0f25-d225-4ff8-b26b-2d2cde972800" width="500" />
+  <img src="https://github.com/user-attachments/assets/149d9a83-f5cc-46bc-8263-af20cadb27c5" width="500" />
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/14b814f8-996a-452b-afcd-c60719325556" width="1000" />
+</p>
+
+> *Note: Questionnaire Builder is still under testing — generated templates may contain bugs when used with the questionnaire page.*
+
+---
+
+### Latest Update:
 1. Added a questionnaire builder interface for ease of building question.js that adhere to template format.
 2. UI update.
 
