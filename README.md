@@ -14,9 +14,9 @@
 ### Dashboard Page
 <img width="1919" height="992" alt="image" src="https://github.com/user-attachments/assets/457bbec6-ac87-4ff5-b23b-356bd7f41198" />
 
-- View all submissions on this device (stored in local storage)
+- View all saved submissions from this device (stored in local storage), with the option to open and review each submission individually in the form
 - Able to download data
-- Searchbar to find specific record
+- Searchbar to find specific record (Filter by ID and Timestamp column)
 - Left/Right toggle buttons to scroll horizontally for huge questionnaires with many questions/columns
 
 ### Questionnaire Builder Page
@@ -27,7 +27,7 @@
 > Have yet to test Questionnaire Builder, so there might be bugs when using the generated template with questionnaire page.
 
 ## Background
-During my internship, I built a questionnaire where your unique response for each question leads you to a different follow-up question. Decided to share this questionnaire wrapper for individuals who need a questionnaire beyond the capabilities of basic questionnaire forms.
+In a previous project, I needed a customizable questionnaire where each response could dynamically determine the next follow-up question. Since no free form builders supported this level of flexibility, I developed a questionnaire rendering engine. To keep it lightweight and accessible, I avoided heavy frameworks or external UI libraries—relying only on Bootstrap. This makes the questionnaire wrapper simple to set up and use, requiring no Node.js or complex configurations, while still offering capabilities beyond standard form builders for informal quizzes and survey that can be conducted using your device.
 
 ### Updates:
 1. Added a questionnaire builder interface for ease of building question.js that adhere to template format.
